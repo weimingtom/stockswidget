@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:gravity="center" android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="fill_parent" 
+    android:focusable="true" android:padding="10dip">
+    <FrameLayout android:id="@+id/header" android:background="@drawable/widget_header_bg" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_weight="0.0">
+        <TextView android:textSize="18.0sp" android:textColor="#ffffffff" android:layout_gravity="left|center" android:paddingLeft="10.0dip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Stocks" android:includeFontPadding="true" android:shadowColor="#ff000000" android:shadowDx="-0.9" android:shadowDy="-1.0" android:shadowRadius="1.0" />
+    </FrameLayout>
+    <FrameLayout android:background="@null" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_weight="1.0">
+		<LinearLayout android:id="@+id/content_view" android:paddingLeft="0.0dip" android:paddingRight="0.0dip" android:scrollbars="none" android:fadingEdge="none" android:layout_width="fill_parent" android:layout_height="fill_parent">
+		</LinearLayout>
+		<ImageView android:background="@drawable/widget_header_shadow" android:layout_width="fill_parent" android:layout_height="wrap_content" />
+    </FrameLayout>
+    <FrameLayout android:id="@+id/refresh_button" android:background="@drawable/widget_footer_bg" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_weight="0.0" android:clickable="true">
+        <TextView android:textSize="12.0sp" android:gravity="center" android:layout_gravity="center" android:id="@+id/refresh_icon" android:layout_width="wrap_content" android:layout_height="wrap_content" android:includeFontPadding="false" android:drawableLeft="@drawable/widget_refresh_icon" android:layout_weight="0.0" />
+    </FrameLayout>
+</LinearLayout>

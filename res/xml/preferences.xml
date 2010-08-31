@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android">
+  <PreferenceCategory android:title="@string/pref_grp_data">
+		<EditTextPreference
+             android:defaultValue="@string/tickersDefault"
+             android:title="@string/tickersTitle"
+             android:summary="@string/tickersDefault"
+             android:key="editTickers" />  		
+  </PreferenceCategory>
+  		  	
+  <PreferenceCategory android:title="@string/pref_grp_general">
+  		<Preference android:title="@string/save" android:key="SAVE"/>  		
+  </PreferenceCategory>
+
+</PreferenceScreen>
