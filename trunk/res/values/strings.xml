@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Stocks Widget</string>    
+    <string name="tickersTitle">Yahoo! Ticker Symbols</string>
+    <string name="tickersDefault">^FTSE,^IXIC,RTS.RS,GOOG</string>
+    <string name="save">Save</string>
+    <string name="pref_grp_data">Data</string>
+    <string name="pref_grp_general">General</string>
+</resources>

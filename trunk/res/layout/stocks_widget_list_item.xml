@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="fill_parent" android:layout_height="fill_parent" android:padding="7dip">
+	<TextView android:textColor="#FFF" android:gravity="left" android:layout_width="fill_parent" android:text="^FTSE" android:id="@+id/quoteSymbol" android:layout_toLeftOf="@+id/quotePrice" android:layout_height="wrap_content"/>
+	<TextView android:text="FTSE 100" android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/quoteName" android:layout_toLeftOf="@+id/quotePrice" android:layout_alignBottom="@+id/layoutChanges"></TextView>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/quotePrice" android:layout_toLeftOf="@+id/layoutChanges" android:text="4682.21" android:textColor="#FFF" android:textColorHighlight="#FFF" android:layout_centerVertical="true" android:layout_marginRight="7dip"></TextView>
+	<RelativeLayout android:id="@+id/layoutChanges" android:layout_alignParentRight="true" android:layout_alignParentTop="true" android:layout_height="fill_parent" android:layout_width="122px">
+		<ImageView android:layout_alignParentTop="true" android:id="@+id/stateImage" android:layout_alignParentLeft="true" android:layout_height="fill_parent" android:layout_width="fill_parent"/>
+	    <TextView android:textColor="#FFF" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_alignBottom="@+id/stateImage" android:id="@+id/quoteChange" android:text="+10.84" android:layout_centerInParent="true" android:layout_marginBottom="2dip"></TextView>
+	    <TextView android:textColor="#FFF" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_alignTop="@+id/stateImage" android:id="@+id/quoteChangePercent" android:text="+0.23%" android:layout_centerInParent="true" android:layout_marginTop="2dip"></TextView>
+    </RelativeLayout>
+</RelativeLayout>
