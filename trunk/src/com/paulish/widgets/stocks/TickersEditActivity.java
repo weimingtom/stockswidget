@@ -7,7 +7,9 @@ import java.util.List;
 import mobi.intuitit.android.content.LauncherIntent;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.appwidget.AppWidgetManager;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.ContextMenu;
@@ -18,7 +20,9 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Button;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
@@ -34,8 +38,10 @@ public class TickersEditActivity extends Activity implements OnClickListener, On
 		setTitle(R.string.editTickers);
 		setContentView(R.layout.stocks_widget_tickers_edit);
 		findViewById(R.id.add).setOnClickListener(this);
-		findViewById(R.id.cancel).setOnClickListener(this);
 		findViewById(R.id.save).setOnClickListener(this);
+		Button btn = (Button)findViewById(R.id.cancel);
+		btn.setText(android.R.string.cancel);
+		btn.setOnClickListener(this);		
 		
 		final ListView tickersList = (ListView)findViewById(R.id.tickersList);
 		registerForContextMenu(tickersList);
@@ -109,6 +115,29 @@ public class TickersEditActivity extends Activity implements OnClickListener, On
 	}
 	
 	private void addSymbol() {
-		Toast.makeText(this, "todo: unimplemented", Toast.LENGTH_SHORT).show();
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+		alert.setTitle(R.string.addTickerSymbol);
+		alert.setMessage("Add ticker symbol");
+
+		// Set an EditText view to get user input
+		final EditText input = new EditText(this);
+		alert.setView(input);
+
+		alert.setPositiveButton(android.R.string.ok,
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						adapter.add(input.getText().toString());
+					}
+				});
+
+		alert.setNegativeButton(android.R.string.cancel,
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						// Canceled.
+					}
+				});
+
+		alert.show();
 	}
 }
