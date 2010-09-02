@@ -17,10 +17,17 @@ public class Preferences {
     	return String.format(aPref, aAppWidgetId);    	
     }
     
-    public static String[] getTickers(Context context, int aAppWidgetId) {
+    public static String[] getTickers(Context context, int appWidgetId) {
     	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);    	
-		String commaTickers = prefs.getString(Preferences.get(Preferences.TICKERS, aAppWidgetId), context.getString(R.string.tickersDefault));
+		String commaTickers = prefs.getString(Preferences.get(Preferences.TICKERS, appWidgetId), context.getString(R.string.tickersDefault));
 		return commaTickers.split(",");
+    }
+    
+    public static void setTickers(Context context, int appWidgetId, String tickers) {
+    	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+    	Editor edit = prefs.edit();
+    	edit.putString(Preferences.get(Preferences.TICKERS, appWidgetId), tickers);
+    	edit.commit();
     }
     
     public static void DropSettings(Context context, int[] appWidgetIds) {

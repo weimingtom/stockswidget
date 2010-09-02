@@ -1,6 +1,8 @@
 package com.paulish.widgets.stocks;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Window;
 import android.webkit.WebChromeClient;
@@ -41,5 +43,12 @@ public class QuoteViewActivity extends Activity{
         }
         else 
             finish();
+	}
+	
+	public static void openForSymbol(Context context, String symbol) {
+		Intent quoteViewIntent = new Intent(context, QuoteViewActivity.class);
+		quoteViewIntent.putExtra(QuoteViewActivity.EXTRA_QUOTE_SYMBOL, symbol);
+		quoteViewIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		context.startActivity(quoteViewIntent);		
 	}
 }
