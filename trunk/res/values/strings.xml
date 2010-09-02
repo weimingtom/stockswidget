@@ -6,4 +6,8 @@
     <string name="save">Save</string>
     <string name="pref_grp_data">Data</string>
     <string name="pref_grp_general">General</string>
+    <string name="editTickers">Edit Ticker Symbols</string>
+    <string name="addTickerSymbol">Add</string>
+    <string name="deleteTickerSymbol">Delete</string>    
+    <string name="openTickerSymbol">Open</string>    
 </resources>

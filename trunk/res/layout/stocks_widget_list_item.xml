@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="fill_parent" android:layout_height="fill_parent" android:padding="7dip">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="fill_parent" android:layout_height="fill_parent" android:padding="7dip" android:id="@+id/listItemLayout">
 	<TextView android:textColor="#FFF" android:gravity="left" android:layout_width="fill_parent" android:text="^FTSE" android:id="@+id/quoteSymbol" android:layout_toLeftOf="@+id/quotePrice" android:layout_height="wrap_content"/>
 	<TextView android:text="FTSE 100" android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/quoteName" android:layout_toLeftOf="@+id/quotePrice" android:layout_alignBottom="@+id/layoutChanges"></TextView>
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/quotePrice" android:layout_toLeftOf="@+id/layoutChanges" android:text="4682.21" android:textColor="#FFF" android:textColorHighlight="#FFF" android:layout_centerVertical="true" android:layout_marginRight="7dip"></TextView>

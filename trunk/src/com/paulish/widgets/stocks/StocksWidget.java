@@ -35,11 +35,17 @@ public class StocksWidget extends AppWidgetProvider {
 	protected void updateWidget(Context context, int appWidgetId) {
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.stocks_widget);
         
-        Intent refreshIntent = new Intent(context, StocksWidget.class);
-        refreshIntent.setAction(ACTION_WIDGET_REFRESH);
-        refreshIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
-        PendingIntent refreshPendingIntent = PendingIntent.getBroadcast(context, 0, refreshIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        views.setOnClickPendingIntent(R.id.refresh_button, refreshPendingIntent);
+        Intent intent = new Intent(context, StocksWidget.class);
+        intent.setAction(ACTION_WIDGET_REFRESH);
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        views.setOnClickPendingIntent(R.id.refresh_button, pendingIntent);
+        
+        intent = new Intent(context, TickersEditActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+        pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        views.setOnClickPendingIntent(R.id.header, pendingIntent);
         
         AppWidgetManager awm = AppWidgetManager.getInstance(context);
         awm.updateAppWidget(appWidgetId, views); 
@@ -95,10 +101,7 @@ public class StocksWidget extends AppWidgetProvider {
 	 */
 	private void onClick(Context context, Intent intent) {
 		// open quote view activity
-		Intent quoteViewIntent = new Intent(context, QuoteViewActivity.class);
-		quoteViewIntent.putExtra(QuoteViewActivity.EXTRA_QUOTE_SYMBOL, intent.getStringExtra(LauncherIntent.Extra.Scroll.EXTRA_ITEM_POS));
-		quoteViewIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		context.startActivity(quoteViewIntent);
+		QuoteViewActivity.openForSymbol(context, intent.getStringExtra(LauncherIntent.Extra.Scroll.EXTRA_ITEM_POS));
 	}
 		
 	/**
@@ -171,7 +174,6 @@ public class StocksWidget extends AppWidgetProvider {
 		intent.putExtra(LauncherIntent.Extra.Scroll.EXTRA_SELECTION, whereClause);
 		intent.putExtra(LauncherIntent.Extra.Scroll.EXTRA_SELECTION_ARGUMENTS, selectionArgs);
 		intent.putExtra(LauncherIntent.Extra.Scroll.EXTRA_SORT_ORDER, orderBy);
-
 	}
 
 	/**
