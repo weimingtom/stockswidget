@@ -96,10 +96,16 @@ public class DataProvider extends ContentProvider {
 	}
 	
 	public static int getStateImage(Double change) {
+		if (change == null)
+			return R.drawable.stocks_widget_state_black;
+		else
 		if (change < 0)
 			return R.drawable.stocks_widget_state_red;
 		else
-			return R.drawable.stocks_widget_state_green;	
+		if (change > 0)
+			return R.drawable.stocks_widget_state_green;
+		else
+			return R.drawable.stocks_widget_state_gray;
 	}
 	
 	private static String prepareTickers(String[] tickers) {
@@ -148,7 +154,7 @@ public class DataProvider extends ContentProvider {
 				values[3] = jo.getString("Change");
 				values[4] = jo.getString("PercentChange");
 				if (jo.isNull("Change"))
-				  values[5] = getStateImage(0.0);
+				  values[5] = getStateImage(null);
 				else
 				  values[5] = getStateImage(jo.getDouble("Change"));
 				
