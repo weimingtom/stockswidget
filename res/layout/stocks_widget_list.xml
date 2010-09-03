@@ -28,5 +28,5 @@
     android:fadingEdge="none"
     android:addStatesFromChildren="false"
     android:choiceMode="singleChoice" 
-	android:duplicateParentState="true" android:background="#559f9fa0">
+	android:duplicateParentState="true" android:background="#aa575757">
 </ListView>

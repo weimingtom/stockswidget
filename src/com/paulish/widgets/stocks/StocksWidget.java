@@ -45,7 +45,7 @@ public class StocksWidget extends AppWidgetProvider {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
         pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        views.setOnClickPendingIntent(R.id.header, pendingIntent);
+        views.setOnClickPendingIntent(R.id.tickers_edit_button, pendingIntent);
         
         AppWidgetManager awm = AppWidgetManager.getInstance(context);
         awm.updateAppWidget(appWidgetId, views); 
