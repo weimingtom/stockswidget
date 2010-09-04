@@ -1,18 +1,11 @@
 package com.paulish.widgets.stocks;
 
-import java.util.List;
-
+import java.util.*;
 import org.json.*;
 import com.paulish.internet.*;
-
-import android.content.ContentProvider;
-import android.content.ContentValues;
-import android.content.Context;
-import android.content.UriMatcher;
+import android.content.*;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
-import android.database.sqlite.SQLiteQueryBuilder;
+import android.database.sqlite.*;
 import android.net.Uri;
 import android.os.AsyncTask;
 
@@ -41,11 +34,21 @@ public class StocksProvider extends ContentProvider {
 	}
 	
 	private static class YahooUpdateTask extends AsyncTask<Integer, Void, Void> {
+		private Integer[] appWidgetIds = null;
+		
 		@Override
-		protected Void doInBackground(Integer... params) {
-			StocksProvider.loadFromYahoo(params[0]);
+		protected Void doInBackground(Integer... appWidgetIds) {
+			StocksWidget.setLoading(ctx, appWidgetIds, true);
+			this.appWidgetIds = appWidgetIds;
+			for (int appWidgetId : appWidgetIds) {
+			   StocksProvider.loadFromYahoo(appWidgetId);
+			}
 			return null;
-		}	
+		}
+				
+		protected void onPostExecute(Void result) {
+	        StocksWidget.setLoading(ctx, appWidgetIds, false);
+	     }		
 	}
 
 	public static final String AUTHORITY = "com.paulish.widgets.stocks.provider";	
@@ -129,6 +132,7 @@ public class StocksProvider extends ContentProvider {
 			int appWId = Integer.parseInt(pathSegs.get(pathSegs.size() - 1));
 			List<String> tickers = Preferences.getTickers(ctx, appWId);
 			qBuilder.appendWhere("symbol in (" + prepareTickers(tickers) + ")");
+			// Log.d(TAG, "symbol in (" + prepareTickers(tickers) + ")");
 			sortOrder = buildSortOrder(tickers);
         }                
         
@@ -141,7 +145,7 @@ public class StocksProvider extends ContentProvider {
                 selectionArgs,
                 "",
                 "",
-                sortOrder);
+                sortOrder);        
         c.setNotificationUri(getContext().getContentResolver(), uri);
         return c;
 	}
@@ -168,7 +172,7 @@ public class StocksProvider extends ContentProvider {
 		final int size = tickers.size(); 
 	    if (size > 0) {
 	    	result.append("\"");
-	        result.append(tickers.get(0));
+	        result.append(tickers.get(0).toUpperCase());
 	    	result.append("\"");
 	        for (int i = 1; i < size; i++) {
 		    	result.append(",\"");
@@ -213,6 +217,24 @@ public class StocksProvider extends ContentProvider {
         yahooUpdateTask.execute(appWidgetId); 
 	}
 	
+	// helper for loadFromYahoo
+	private static void setValuesFromJSONObject(ContentValues values, JSONObject jo) {
+		values.clear();
+		try {
+			values.put(QuotesColumns.symbol.toString(), jo.getString("Symbol"));
+			if (!jo.isNull("Name"))
+				values.put(QuotesColumns.name.toString(), jo.getString("Name"));
+			if (!jo.isNull("LastTradePriceOnly"))
+				values.put(QuotesColumns.price.toString(), jo.getString("LastTradePriceOnly"));
+			// percent change is N/A when change is null
+			if (!jo.isNull("Change")) {
+				values.put(QuotesColumns.change.toString(), jo.getDouble("Change"));
+				values.put(QuotesColumns.pchange.toString(), jo.getString("PercentChange"));
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
 	private static void loadFromYahoo(List<String> tickers) {
 		
 		ContentValues values = new ContentValues();
@@ -231,22 +253,21 @@ public class StocksProvider extends ContentProvider {
          
         String response = client.getResponse();
         //Log.d(TAG, "... response: " + response);
+               
         try {
-			JSONObject jo = new JSONObject(response);
-			JSONArray ja = jo.getJSONObject("query").getJSONObject("results").getJSONArray("quote");
-			for (int i = 0; i < ja.length(); i++) {
-				jo = ja.getJSONObject(i);
-				values.clear();
-				values.put(QuotesColumns.symbol.toString(), jo.getString("Symbol"));
-				if (!jo.isNull("Name"))
-					values.put(QuotesColumns.name.toString(), jo.getString("Name"));
-				if (!jo.isNull("LastTradePriceOnly"))
-					values.put(QuotesColumns.price.toString(), jo.getString("LastTradePriceOnly"));
-				// percent change is N/A when change is null
-				if (!jo.isNull("Change")) {
-					values.put(QuotesColumns.change.toString(), jo.getDouble("Change"));
-					values.put(QuotesColumns.pchange.toString(), jo.getString("PercentChange"));
+			JSONObject jo = new JSONObject(response).getJSONObject("query").getJSONObject("results");
+			// we can get either an array of quotes or just one quote
+			JSONArray ja = jo.optJSONArray("quote");			
+			if (ja != null) {
+				for (int i = 0; i < ja.length(); i++) {
+					jo = ja.getJSONObject(i);
+					setValuesFromJSONObject(values, jo);
+					stocksDB.insert(QUOTES_TABLE_NAME, null, values);
 				}
+			} else
+			{
+				jo = jo.optJSONObject("quote");
+				setValuesFromJSONObject(values, jo);
 				stocksDB.insert(QUOTES_TABLE_NAME, null, values);
 			}
 		} catch (JSONException e) {

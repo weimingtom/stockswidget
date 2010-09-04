@@ -1,18 +1,13 @@
 package com.paulish.widgets.stocks;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import android.appwidget.AppWidgetManager;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.SharedPreferences;
+import java.util.*;
+import android.content.*;
 import android.content.SharedPreferences.Editor;
+import android.appwidget.AppWidgetManager;
 import android.preference.PreferenceManager;
 
 public class Preferences {
-    public static final String TICKERS = "editTickers";
+    public static final String TICKERS = "EditTickers-%d";
        
     public static String get(String aPref, int aAppWidgetId) {
     	return String.format(aPref, aAppWidgetId);    	
@@ -20,7 +15,7 @@ public class Preferences {
     
     public static List<String> getTickers(Context context, int appWidgetId) {
     	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);    	
-		String commaTickers = prefs.getString(Preferences.get(Preferences.TICKERS, appWidgetId), context.getString(R.string.tickersDefault));		
+		String commaTickers = prefs.getString(Preferences.get(Preferences.TICKERS, appWidgetId), context.getString(R.string.tickersDefault));
 		return new ArrayList<String>(Arrays.asList(commaTickers.split(",")));
     }
     
@@ -51,8 +46,8 @@ public class Preferences {
     public static void DropSettings(Context context, int[] appWidgetIds) {
     	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		Editor edit = prefs.edit();
-		for(int appWId : appWidgetIds) {
-			edit.remove(Preferences.get(Preferences.TICKERS, appWId));
+		for(int appWidgetId : appWidgetIds) {
+			edit.remove(Preferences.get(Preferences.TICKERS, appWidgetId));
 		}
 		edit.commit();
     }

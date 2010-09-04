@@ -15,37 +15,40 @@ public class StocksWidget extends AppWidgetProvider {
 	private static final String TAG = "paulish.StocksWidget";
 	// Actions
 	public static String ACTION_WIDGET_REFRESH = "refresh";
+	public static String ACTION_WIDGET_NOTIFY_LOADING = "notify_loading";
 	
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
 		// If no specific widgets requested, collect list of all		
 		
-		if (appWidgetIds == null) {
+		if (appWidgetIds == null) 
 			appWidgetIds = Preferences.getAllWidgetIds(context);
-		}
-        		
-        for (int appWidgetId : appWidgetIds) {
-        	updateWidget(context, appWidgetId);           
-        }	
+
+		for (int appWidgetId : appWidgetIds) 
+        	updateWidget(context, appWidgetId, false);           
 	}
 	
-	protected void updateWidget(Context context, int appWidgetId) {
+	protected static void updateWidget(Context context, int appWidgetId, boolean loading) {
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.stocks_widget);
         
         Intent intent = new Intent(context, StocksWidget.class);
         intent.setAction(ACTION_WIDGET_REFRESH);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        // put appWidgetId here or intent will replace an intent of another widget
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, appWidgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         views.setOnClickPendingIntent(R.id.refresh_button, pendingIntent);
         
         intent = new Intent(context, ConfigurationActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
-        pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        pendingIntent = PendingIntent.getActivity(context, appWidgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         views.setOnClickPendingIntent(R.id.tickers_edit_button, pendingIntent);
 
-        StocksProvider.loadFromYahooInBackgroud(appWidgetId);
-        
+        if (loading)
+        	views.setTextViewText(R.id.refresh_icon, " " + context.getString(R.string.loading));
+        else
+        	views.setTextViewText(R.id.refresh_icon, "");
+       
         AppWidgetManager awm = AppWidgetManager.getInstance(context);
         awm.updateAppWidget(appWidgetId, views); 
 	}
@@ -60,6 +63,12 @@ public class StocksWidget extends AppWidgetProvider {
 			if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
 				StocksProvider.loadFromYahooInBackgroud(appWidgetId);
 			}
+		} else if  (ACTION_WIDGET_NOTIFY_LOADING.equals(action)) {
+			final int appWidgetId = intent.getExtras().getInt(AppWidgetManager.EXTRA_APPWIDGET_ID,
+					AppWidgetManager.INVALID_APPWIDGET_ID);
+			if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+				updateWidget(context, appWidgetId, intent.getExtras().getBoolean("loading"));
+			}			
 		} else if (AppWidgetManager.ACTION_APPWIDGET_DELETED.equals(action)) {
 			final int appWidgetId = intent.getExtras().getInt(AppWidgetManager.EXTRA_APPWIDGET_ID,
 					AppWidgetManager.INVALID_APPWIDGET_ID);
@@ -116,7 +125,7 @@ public class StocksWidget extends AppWidgetProvider {
 		if (appWidgetId < 0)
 			return;
 		
-		updateWidget(context, appWidgetId);
+		updateWidget(context, appWidgetId, false);
 		Intent replaceDummy = CreateMakeScrollableIntent(context, appWidgetId);
 
 		// Send it out
@@ -242,4 +251,13 @@ public class StocksWidget extends AppWidgetProvider {
 		intent.putExtra(LauncherIntent.Extra.Scroll.Mapping.EXTRA_DEFAULT_RESOURCES, defResources);
 	}
     
+	public static void setLoading(Context context, Integer[] appWidgetIds, boolean loading) {
+		Intent intent = new Intent(context, StocksWidget.class);
+		intent.setAction(ACTION_WIDGET_NOTIFY_LOADING);
+		intent.putExtra("loading", loading);
+		for (int appWidgetId : appWidgetIds) {
+			intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+			context.sendBroadcast(intent);
+		}
+	}
 }

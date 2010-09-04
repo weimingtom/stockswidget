@@ -9,5 +9,6 @@
     <string name="editTickers">Edit Ticker Symbols</string>
     <string name="addTickerSymbol">Add</string>
     <string name="deleteTickerSymbol">Delete</string>    
-    <string name="openTickerSymbol">Open</string>    
+    <string name="openTickerSymbol">Open</string>
+    <string name="loading">Loading...</string>
 </resources>
