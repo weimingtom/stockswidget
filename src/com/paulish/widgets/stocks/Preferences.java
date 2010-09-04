@@ -1,6 +1,7 @@
 package com.paulish.widgets.stocks;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import android.appwidget.AppWidgetManager;
@@ -17,10 +18,27 @@ public class Preferences {
     	return String.format(aPref, aAppWidgetId);    	
     }
     
-    public static String[] getTickers(Context context, int appWidgetId) {
+    public static List<String> getTickers(Context context, int appWidgetId) {
     	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);    	
-		String commaTickers = prefs.getString(Preferences.get(Preferences.TICKERS, appWidgetId), context.getString(R.string.tickersDefault));
-		return commaTickers.split(",");
+		String commaTickers = prefs.getString(Preferences.get(Preferences.TICKERS, appWidgetId), context.getString(R.string.tickersDefault));		
+		return new ArrayList<String>(Arrays.asList(commaTickers.split(",")));
+    }
+    
+    public static List<String> getAllTickers(Context context) {
+    	ArrayList<String> result = new ArrayList<String>();
+    	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+    	int[] appWidgetIds = getAllWidgetIds(context);
+    	String commaTickers;
+    	String[] tickers;
+    	for (int appWidgetId : appWidgetIds) {
+    		commaTickers = prefs.getString(Preferences.get(Preferences.TICKERS, appWidgetId), context.getString(R.string.tickersDefault));
+    		tickers = commaTickers.split(",");
+    		for (String ticker : tickers) {
+    			if (!result.contains(ticker))
+    			  result.add(ticker);
+    		}
+    	}
+    	return result;
     }
     
     public static void setTickers(Context context, int appWidgetId, String tickers) {
