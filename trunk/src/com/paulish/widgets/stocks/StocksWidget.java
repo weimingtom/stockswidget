@@ -23,11 +23,8 @@ public class StocksWidget extends AppWidgetProvider {
 		if (appWidgetIds == null) {
 			appWidgetIds = Preferences.getAllWidgetIds(context);
 		}
-        
-        final int N = appWidgetIds.length;
-        for (int i = 0; i < N; i++) {
-            // Construct views
-        	int appWidgetId = appWidgetIds[i];
+        		
+        for (int appWidgetId : appWidgetIds) {
         	updateWidget(context, appWidgetId);           
         }	
 	}
@@ -46,6 +43,8 @@ public class StocksWidget extends AppWidgetProvider {
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
         pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         views.setOnClickPendingIntent(R.id.tickers_edit_button, pendingIntent);
+
+        StocksProvider.loadFromYahooInBackgroud(appWidgetId);
         
         AppWidgetManager awm = AppWidgetManager.getInstance(context);
         awm.updateAppWidget(appWidgetId, views); 
@@ -54,12 +53,12 @@ public class StocksWidget extends AppWidgetProvider {
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		final String action = intent.getAction();
-		Log.d(TAG, "recieved -> " +  action);
+		// Log.d(TAG, "recieved -> " +  action);
 		if (ACTION_WIDGET_REFRESH.equals(action)) {
 			final int appWidgetId = intent.getExtras().getInt(AppWidgetManager.EXTRA_APPWIDGET_ID,
 					AppWidgetManager.INVALID_APPWIDGET_ID);
 			if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
-				DataProvider.notifyDatabaseModification(appWidgetId);
+				StocksProvider.loadFromYahooInBackgroud(appWidgetId);
 			}
 		} else if (AppWidgetManager.ACTION_APPWIDGET_DELETED.equals(action)) {
 			final int appWidgetId = intent.getExtras().getInt(AppWidgetManager.EXTRA_APPWIDGET_ID,
@@ -69,7 +68,7 @@ public class StocksWidget extends AppWidgetProvider {
 			}
 		} else if (TextUtils.equals(action, LauncherIntent.Action.ACTION_READY)) {
 			// Receive ready signal
-			Log.d(TAG, "widget ready");
+			// Log.d(TAG, "widget ready");
 			onAppWidgetReady(context, intent);			
 		} else if (TextUtils.equals(action, LauncherIntent.Action.ACTION_FINISH)) {
 
@@ -114,9 +113,9 @@ public class StocksWidget extends AppWidgetProvider {
 		int appWidgetId = intent.getExtras().getInt(AppWidgetManager.EXTRA_APPWIDGET_ID,
 				AppWidgetManager.INVALID_APPWIDGET_ID);
 
-		if (appWidgetId < 0) {
+		if (appWidgetId < 0)
 			return;
-		}
+		
 		updateWidget(context, appWidgetId);
 		Intent replaceDummy = CreateMakeScrollableIntent(context, appWidgetId);
 
@@ -128,20 +127,20 @@ public class StocksWidget extends AppWidgetProvider {
 	 * Constructs a Intent that tells the launcher to replace the dummy with the ListView
 	 */
 	public Intent CreateMakeScrollableIntent(Context context, int appWidgetId) {
-		Log.d(TAG, "creating ACTION_SCROLL_WIDGET_START intent");
+		// Log.d(TAG, "creating ACTION_SCROLL_WIDGET_START intent");
 		Intent result = new Intent(LauncherIntent.Action.ACTION_SCROLL_WIDGET_START);
 
 		// Put widget info
 		result.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
 		result.putExtra(LauncherIntent.Extra.EXTRA_VIEW_ID, R.id.content_view);
 
-		result.putExtra(LauncherIntent.Extra.Scroll.EXTRA_DATA_PROVIDER_ALLOW_REQUERY, false);
+		result.putExtra(LauncherIntent.Extra.Scroll.EXTRA_DATA_PROVIDER_ALLOW_REQUERY, true);
 
 		// Give a layout resource to be inflated. If this is not given, the launcher will create one		
 		result.putExtra(LauncherIntent.Extra.Scroll.EXTRA_LISTVIEW_LAYOUT_ID, R.layout.stocks_widget_list);
 		result.putExtra(LauncherIntent.Extra.Scroll.EXTRA_ITEM_LAYOUT_ID, R.layout.stocks_widget_list_item);
 		
-		putProvider(result, DataProvider.CONTENT_URI_MESSAGES.buildUpon().appendEncodedPath(
+		putProvider(result, StocksProvider.CONTENT_URI_MESSAGES.buildUpon().appendEncodedPath(
 				Integer.toString(appWidgetId)).toString());
 		putMapping(context, appWidgetId, result);
 
@@ -170,7 +169,7 @@ public class StocksWidget extends AppWidgetProvider {
 		intent.putExtra(LauncherIntent.Extra.Scroll.EXTRA_DATA_URI, widgetUri);
 
 		// Other arguments for managed query
-		intent.putExtra(LauncherIntent.Extra.Scroll.EXTRA_PROJECTION, DataProvider.PROJECTION_APPWIDGETS);
+		intent.putExtra(LauncherIntent.Extra.Scroll.EXTRA_PROJECTION, StocksProvider.PROJECTION_QUOTES);
 		intent.putExtra(LauncherIntent.Extra.Scroll.EXTRA_SELECTION, whereClause);
 		intent.putExtra(LauncherIntent.Extra.Scroll.EXTRA_SELECTION_ARGUMENTS, selectionArgs);
 		intent.putExtra(LauncherIntent.Extra.Scroll.EXTRA_SORT_ORDER, orderBy);
@@ -193,44 +192,44 @@ public class StocksWidget extends AppWidgetProvider {
 		int iItem = 0;
 		
 		intent.putExtra(LauncherIntent.Extra.Scroll.EXTRA_ITEM_ACTION_VIEW_URI_INDEX, 
-				DataProvider.DataProviderColumns.symbol.ordinal());
+				StocksProvider.QuotesColumns.symbol.ordinal());
 		
-		cursorIndices[iItem] = DataProvider.DataProviderColumns.symbol.ordinal();
+		cursorIndices[iItem] = StocksProvider.QuotesColumns.symbol.ordinal();
 		viewTypes[iItem] = LauncherIntent.Extra.Scroll.Types.TEXTVIEW;
 		layoutIds[iItem] = R.id.quoteSymbol;
 		clickable[iItem] = true;
 		defResources[iItem] = 0;
 		iItem++;
 		
-		cursorIndices[iItem] = DataProvider.DataProviderColumns.name.ordinal();
+		cursorIndices[iItem] = StocksProvider.QuotesColumns.name.ordinal();
 		viewTypes[iItem] = LauncherIntent.Extra.Scroll.Types.TEXTVIEW;
 		layoutIds[iItem] = R.id.quoteName;
 		clickable[iItem] = true;
 		defResources[iItem] = 0;
 		iItem++;
 		
-		cursorIndices[iItem] = DataProvider.DataProviderColumns.lastTradePrice.ordinal();
+		cursorIndices[iItem] = StocksProvider.QuotesColumns.price.ordinal();
 		viewTypes[iItem] = LauncherIntent.Extra.Scroll.Types.TEXTVIEW;
 		layoutIds[iItem] = R.id.quotePrice;
 		clickable[iItem] = true;
 		defResources[iItem] = 0;
 		iItem++;
 
-		cursorIndices[iItem] = DataProvider.DataProviderColumns.change.ordinal();
+		cursorIndices[iItem] = StocksProvider.QuotesColumns.change.ordinal();
 		viewTypes[iItem] = LauncherIntent.Extra.Scroll.Types.TEXTVIEW;
 		layoutIds[iItem] = R.id.quoteChange;
 		clickable[iItem] = true;
 		defResources[iItem] = 0;
 		iItem++;
 		
-		cursorIndices[iItem] = DataProvider.DataProviderColumns.percentChange.ordinal();
+		cursorIndices[iItem] = StocksProvider.QuotesColumns.pchange.ordinal();
 		viewTypes[iItem] = LauncherIntent.Extra.Scroll.Types.TEXTVIEW;
 		layoutIds[iItem] = R.id.quoteChangePercent;
 		clickable[iItem] = true;
 		defResources[iItem] = 0;
 		iItem++;
 
-		cursorIndices[iItem] = DataProvider.DataProviderColumns.stateImage.ordinal();
+		cursorIndices[iItem] = StocksProvider.QuotesColumns.stateimage.ordinal();
 		viewTypes[iItem] = LauncherIntent.Extra.Scroll.Types.IMAGERESOURCE;
 		layoutIds[iItem] = R.id.stateImage;
 		clickable[iItem] = true;

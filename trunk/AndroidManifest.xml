@@ -5,7 +5,7 @@
       android:versionName="0.3.0">
     <application android:icon="@drawable/stocks" android:label="@string/app_name">
    		<provider
-   		  android:name=".DataProvider"
+   		  android:name=".StocksProvider"
             android:authorities="com.paulish.widgets.stocks.provider"
             android:multiprocess="true"
             android:grantUriPermissions="true"

@@ -1,7 +1,5 @@
 package com.paulish.widgets.stocks;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import android.app.Activity;
@@ -48,7 +46,7 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID);
-			tickers = new ArrayList<String>(Arrays.asList(Preferences.getTickers(this, appWidgetId)));
+			tickers = Preferences.getTickers(this, appWidgetId);
 			adapter = new ArrayAdapter<String>(this, R.layout.stocks_widget_tickers_edit_list_item, tickers);
 			tickersList.setAdapter(adapter);
 		} else
@@ -66,7 +64,7 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 			Intent resultValue = new Intent();                    
             resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
             setResult(RESULT_OK, resultValue);
-            DataProvider.notifyDatabaseModification(appWidgetId);
+            StocksProvider.loadFromYahooInBackgroud(appWidgetId);
             finish();            
 			break;
 		case R.id.add:
