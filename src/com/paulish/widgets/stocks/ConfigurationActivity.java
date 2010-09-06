@@ -30,8 +30,8 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {	
 		super.onCreate(savedInstanceState);
-		setTitle(R.string.editTickers);
-		setContentView(R.layout.stocks_widget_tickers_edit);
+		setTitle(R.string.editPortfolio);
+		setContentView(R.layout.stocks_widget_portfolio_edit);
 		findViewById(R.id.add).setOnClickListener(this);
 		findViewById(R.id.save).setOnClickListener(this);
 		Button btn = (Button)findViewById(R.id.cancel);
@@ -46,8 +46,8 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID);
-			tickers = Preferences.getTickers(this, appWidgetId);
-			adapter = new ArrayAdapter<String>(this, R.layout.stocks_widget_tickers_edit_list_item, tickers);
+			tickers = Preferences.getPortfolio(this, appWidgetId);
+			adapter = new ArrayAdapter<String>(this, R.layout.stocks_widget_portfolio_edit_list_item, tickers);
 			tickersList.setAdapter(adapter);
 		} else
 			finish();
@@ -140,6 +140,6 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 				tickers.append(adapter.getItem(i));
 			}
 		}
-		Preferences.setTickers(this, appWidgetId, tickers.toString());
+		Preferences.setPortfolio(this, appWidgetId, tickers.toString());
 	}
 }

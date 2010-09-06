@@ -129,7 +129,7 @@ public class StocksProvider extends ContentProvider {
         if ((URI_MATCHER.match(uri)) == URI_QUOTE) {
         	final List<String> pathSegs = uri.getPathSegments();
 			final int appWId = Integer.parseInt(pathSegs.get(pathSegs.size() - 1));
-			final List<String> tickers = Preferences.getTickers(ctx, appWId);
+			final List<String> tickers = Preferences.getPortfolio(ctx, appWId);
 			qBuilder.appendWhere("symbol in (" + prepareTickers(tickers) + ")");
 			// Log.d(TAG, "symbol in (" + prepareTickers(tickers) + ")");
 			sortOrder = buildSortOrder(tickers);
@@ -200,12 +200,12 @@ public class StocksProvider extends ContentProvider {
 	
 	public static void loadFromYahoo(Integer appWidgetId) {
 		if (appWidgetId == null) {
-			final List<String> tickers = Preferences.getAllTickers(ctx);
+			final List<String> tickers = Preferences.getAllPortfolios(ctx);
 			loadFromYahoo(tickers);
 		    notifyAllWidgetsModification();
 		}
 		else {
-			final List<String> tickers = Preferences.getTickers(ctx, appWidgetId);
+			final List<String> tickers = Preferences.getPortfolio(ctx, appWidgetId);
 			loadFromYahoo(tickers);
 			notifyDatabaseModification(appWidgetId);
 		}
