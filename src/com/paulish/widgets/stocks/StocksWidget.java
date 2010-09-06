@@ -14,8 +14,8 @@ public class StocksWidget extends AppWidgetProvider {
 	// Tag for logging
 	private static final String TAG = "paulish.StocksWidget";
 	// Actions
-	public static String ACTION_WIDGET_REFRESH = "refresh";
-	public static String ACTION_WIDGET_NOTIFY_LOADING = "notify_loading";
+	public static final String ACTION_WIDGET_REFRESH = "refresh";
+	public static final String ACTION_WIDGET_NOTIFY_LOADING = "notify_loading";
 	
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
@@ -29,7 +29,7 @@ public class StocksWidget extends AppWidgetProvider {
 	}
 	
 	protected static void updateWidget(Context context, int appWidgetId, boolean loading) {
-        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.stocks_widget);
+        final RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.stocks_widget);
         
         Intent intent = new Intent(context, StocksWidget.class);
         intent.setAction(ACTION_WIDGET_REFRESH);
@@ -49,7 +49,7 @@ public class StocksWidget extends AppWidgetProvider {
         else
         	views.setTextViewText(R.id.refresh_icon, "");
        
-        AppWidgetManager awm = AppWidgetManager.getInstance(context);
+        final AppWidgetManager awm = AppWidgetManager.getInstance(context);
         awm.updateAppWidget(appWidgetId, views); 
 	}
 		
@@ -126,7 +126,7 @@ public class StocksWidget extends AppWidgetProvider {
 			return;
 		
 		updateWidget(context, appWidgetId, false);
-		Intent replaceDummy = CreateMakeScrollableIntent(context, appWidgetId);
+		final Intent replaceDummy = CreateMakeScrollableIntent(context, appWidgetId);
 
 		// Send it out
 		context.sendBroadcast(replaceDummy);
@@ -169,9 +169,9 @@ public class StocksWidget extends AppWidgetProvider {
 		if (intent == null)
 			return;
 
-		String whereClause = null;
-		String orderBy = null;
-		String[] selectionArgs = null;
+		final String whereClause = null;
+		final String orderBy = null;
+		final String[] selectionArgs = null;
 
 		// Put the data uri in as a string. Do not use setData, Home++ does not
 		// have a filter for that
@@ -191,12 +191,12 @@ public class StocksWidget extends AppWidgetProvider {
 		if (intent == null)
 			return;
 
-		int NB_ITEMS_TO_FILL = 6;
-		int[] cursorIndices = new int[NB_ITEMS_TO_FILL];
-		int[] viewTypes = new int[NB_ITEMS_TO_FILL];
-		int[] layoutIds = new int[NB_ITEMS_TO_FILL];
-		boolean[] clickable = new boolean[NB_ITEMS_TO_FILL];
-		int[] defResources = new int[NB_ITEMS_TO_FILL];
+		final int NB_ITEMS_TO_FILL = 6;
+		final int[] cursorIndices = new int[NB_ITEMS_TO_FILL];
+		final int[] viewTypes = new int[NB_ITEMS_TO_FILL];
+		final int[] layoutIds = new int[NB_ITEMS_TO_FILL];
+		final boolean[] clickable = new boolean[NB_ITEMS_TO_FILL];
+		final int[] defResources = new int[NB_ITEMS_TO_FILL];
 
 		int iItem = 0;
 		
@@ -252,7 +252,7 @@ public class StocksWidget extends AppWidgetProvider {
 	}
     
 	public static void setLoading(Context context, Integer[] appWidgetIds, boolean loading) {
-		Intent intent = new Intent(context, StocksWidget.class);
+		final Intent intent = new Intent(context, StocksWidget.class);
 		intent.setAction(ACTION_WIDGET_NOTIFY_LOADING);
 		intent.putExtra("loading", loading);
 		for (int appWidgetId : appWidgetIds) {
