@@ -42,7 +42,7 @@ public class StocksWidget extends AppWidgetProvider {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
         pendingIntent = PendingIntent.getActivity(context, appWidgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        views.setOnClickPendingIntent(R.id.tickers_edit_button, pendingIntent);
+        views.setOnClickPendingIntent(R.id.portfolio_edit_button, pendingIntent);
 
         if (loading)
         	views.setTextViewText(R.id.refresh_icon, " " + context.getString(R.string.loading));
