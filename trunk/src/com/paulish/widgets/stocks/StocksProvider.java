@@ -119,7 +119,7 @@ public class StocksProvider extends ContentProvider {
 	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 		// Log.d(TAG, "start loading data");
         
-		SQLiteQueryBuilder qBuilder = new SQLiteQueryBuilder();
+		final SQLiteQueryBuilder qBuilder = new SQLiteQueryBuilder();
 
         // Set the table we're querying.
         qBuilder.setTables(QUOTES_TABLE_NAME);
@@ -161,14 +161,14 @@ public class StocksProvider extends ContentProvider {
 	}
 	
 	public static void notifyAllWidgetsModification() {
-		int[] appWidgetIds = Preferences.getAllWidgetIds(ctx);
+		final int[] appWidgetIds = Preferences.getAllWidgetIds(ctx);
 		for (int appWidgetId : appWidgetIds) {
 			notifyDatabaseModification(appWidgetId);
 		}
 	}
 	
 	private static String prepareTickers(List<String> tickers) {
-		StringBuffer result = new StringBuffer();
+		final StringBuffer result = new StringBuffer();
 		final int size = tickers.size(); 
 	    if (size > 0) {
 	    	result.append("\"");
@@ -184,7 +184,7 @@ public class StocksProvider extends ContentProvider {
 	}
 	
 	private static String buildSortOrder(List<String> tickers) {
-		StringBuffer result = new StringBuffer();
+		final StringBuffer result = new StringBuffer();
 		final int size = tickers.size(); 
 	    if (size > 1) {
 	    	result.append("CASE symbol");
@@ -201,12 +201,12 @@ public class StocksProvider extends ContentProvider {
 	
 	public static void loadFromYahoo(Integer appWidgetId) {
 		if (appWidgetId == null) {
-			List<String> tickers = Preferences.getAllTickers(ctx);
+			final List<String> tickers = Preferences.getAllTickers(ctx);
 			loadFromYahoo(tickers);
 		    notifyAllWidgetsModification();
 		}
 		else {
-			List<String> tickers = Preferences.getTickers(ctx, appWidgetId);
+			final List<String> tickers = Preferences.getTickers(ctx, appWidgetId);
 			loadFromYahoo(tickers);
 			notifyDatabaseModification(appWidgetId);
 		}
@@ -237,9 +237,9 @@ public class StocksProvider extends ContentProvider {
 	}
 	private static void loadFromYahoo(List<String> tickers) {
 		
-		ContentValues values = new ContentValues();
+		final ContentValues values = new ContentValues();
 		
-		RestClient client = new RestClient("http://query.yahooapis.com/v1/public/yql");
+		final RestClient client = new RestClient("http://query.yahooapis.com/v1/public/yql");
         client.AddParam("q", "select Symbol, Name, LastTradePriceOnly, Change, PercentChange from yahoo.finance.quotes where symbol in (" + prepareTickers(tickers) + ")");
         client.AddParam("format", "json");
         client.AddParam("env", "http://datatables.org/alltables.env");
@@ -251,13 +251,15 @@ public class StocksProvider extends ContentProvider {
             e.printStackTrace();
         }
          
-        String response = client.getResponse();
+        final String response = client.getResponse();
+        if (response == null)
+        	return;
         //Log.d(TAG, "... response: " + response);
                
         try {
 			JSONObject jo = new JSONObject(response).getJSONObject("query").getJSONObject("results");
 			// we can get either an array of quotes or just one quote
-			JSONArray ja = jo.optJSONArray("quote");			
+			final JSONArray ja = jo.optJSONArray("quote");			
 			if (ja != null) {
 				for (int i = 0; i < ja.length(); i++) {
 					jo = ja.getJSONObject(i);

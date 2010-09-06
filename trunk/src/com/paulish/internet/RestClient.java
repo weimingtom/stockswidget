@@ -21,7 +21,7 @@ public class RestClient {
     private int responseCode;
     private String message;
 
-    private String response;
+    private String response = null;
 
     public String getResponse() {
         return response;
