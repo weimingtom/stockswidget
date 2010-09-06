@@ -46,7 +46,7 @@ public class QuoteViewActivity extends Activity{
 	}
 	
 	public static void openForSymbol(Context context, String symbol) {
-		Intent quoteViewIntent = new Intent(context, QuoteViewActivity.class);
+		final Intent quoteViewIntent = new Intent(context, QuoteViewActivity.class);
 		quoteViewIntent.putExtra(QuoteViewActivity.EXTRA_QUOTE_SYMBOL, symbol);
 		quoteViewIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		context.startActivity(quoteViewIntent);		

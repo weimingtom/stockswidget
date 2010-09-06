@@ -22,8 +22,7 @@ public class StocksProvider extends ContentProvider {
 
 		@Override
 		public void onCreate(SQLiteDatabase db) {
-			String sql = "CREATE TABLE IF NOT EXISTS quotes (symbol TEXT PRIMARY KEY ON CONFLICT REPLACE, name TEXT, price TEXT, change DOUBLE, pchange TEXT);";
-			db.execSQL(sql);
+			db.execSQL( "CREATE TABLE IF NOT EXISTS quotes (symbol TEXT PRIMARY KEY ON CONFLICT REPLACE, name TEXT, price TEXT, change DOUBLE, pchange TEXT);");
 		}
 
 		@Override
@@ -128,9 +127,9 @@ public class StocksProvider extends ContentProvider {
         // being asked for a specific record, so set the
         // WHERE clause in our query.
         if ((URI_MATCHER.match(uri)) == URI_QUOTE) {
-        	List<String> pathSegs = uri.getPathSegments();
-			int appWId = Integer.parseInt(pathSegs.get(pathSegs.size() - 1));
-			List<String> tickers = Preferences.getTickers(ctx, appWId);
+        	final List<String> pathSegs = uri.getPathSegments();
+			final int appWId = Integer.parseInt(pathSegs.get(pathSegs.size() - 1));
+			final List<String> tickers = Preferences.getTickers(ctx, appWId);
 			qBuilder.appendWhere("symbol in (" + prepareTickers(tickers) + ")");
 			// Log.d(TAG, "symbol in (" + prepareTickers(tickers) + ")");
 			sortOrder = buildSortOrder(tickers);
@@ -156,7 +155,7 @@ public class StocksProvider extends ContentProvider {
 	}
 	
 	public static void notifyDatabaseModification(int widgetId) {		
-		Uri widgetUri = CONTENT_URI_MESSAGES.buildUpon().appendEncodedPath(Integer.toString(widgetId)).build();
+		final Uri widgetUri = CONTENT_URI_MESSAGES.buildUpon().appendEncodedPath(Integer.toString(widgetId)).build();
 		ctx.getContentResolver().notifyChange(widgetUri, null);
 	}
 	
