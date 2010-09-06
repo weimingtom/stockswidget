@@ -7,26 +7,26 @@ import android.appwidget.AppWidgetManager;
 import android.preference.PreferenceManager;
 
 public class Preferences {
-    public static final String TICKERS = "EditTickers-%d";
+    public static final String PORTFOLIO = "Portfolio-%d";
        
     public static String get(String aPref, int aAppWidgetId) {
     	return String.format(aPref, aAppWidgetId);    	
     }
     
-    public static List<String> getTickers(Context context, int appWidgetId) {
+    public static List<String> getPortfolio(Context context, int appWidgetId) {
     	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);    	
-		String commaTickers = prefs.getString(Preferences.get(Preferences.TICKERS, appWidgetId), context.getString(R.string.tickersDefault));
+		String commaTickers = prefs.getString(Preferences.get(Preferences.PORTFOLIO, appWidgetId), context.getString(R.string.tickersDefault));
 		return new ArrayList<String>(Arrays.asList(commaTickers.split(",")));
     }
     
-    public static List<String> getAllTickers(Context context) {
+    public static List<String> getAllPortfolios(Context context) {
     	ArrayList<String> result = new ArrayList<String>();
     	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
     	int[] appWidgetIds = getAllWidgetIds(context);
     	String commaTickers;
     	String[] tickers;
     	for (int appWidgetId : appWidgetIds) {
-    		commaTickers = prefs.getString(Preferences.get(Preferences.TICKERS, appWidgetId), context.getString(R.string.tickersDefault));
+    		commaTickers = prefs.getString(Preferences.get(Preferences.PORTFOLIO, appWidgetId), context.getString(R.string.tickersDefault));
     		tickers = commaTickers.split(",");
     		for (String ticker : tickers) {
     			if (!result.contains(ticker))
@@ -36,10 +36,10 @@ public class Preferences {
     	return result;
     }
     
-    public static void setTickers(Context context, int appWidgetId, String tickers) {
+    public static void setPortfolio(Context context, int appWidgetId, String tickers) {
     	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
     	Editor edit = prefs.edit();
-    	edit.putString(Preferences.get(Preferences.TICKERS, appWidgetId), tickers);
+    	edit.putString(Preferences.get(Preferences.PORTFOLIO, appWidgetId), tickers);
     	edit.commit();
     }
     
@@ -47,7 +47,7 @@ public class Preferences {
     	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		Editor edit = prefs.edit();
 		for(int appWidgetId : appWidgetIds) {
-			edit.remove(Preferences.get(Preferences.TICKERS, appWidgetId));
+			edit.remove(Preferences.get(Preferences.PORTFOLIO, appWidgetId));
 		}
 		edit.commit();
     }
