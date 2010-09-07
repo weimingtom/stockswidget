@@ -52,12 +52,15 @@ public class StocksProvider extends ContentProvider {
 
 	public static final String AUTHORITY = "com.paulish.widgets.stocks.provider";	
 	public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY);
-	public static final Uri CONTENT_URI_MESSAGES = CONTENT_URI.buildUpon().appendEncodedPath("quotes").build();
+
+	public static final Uri CONTENT_URI_QUOTES = CONTENT_URI.buildUpon().appendEncodedPath("quotes").build();
+	public static final Uri CONTENT_URI_WIDGET_QUOTES = CONTENT_URI.buildUpon().appendEncodedPath("widget_quotes").build();
 	
 	private static final UriMatcher URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
 	private static final int URI_QUOTES = 0;
-	private static final int URI_QUOTE = 0;
-	
+	private static final int URI_QUOTE = 1;
+	private static final int URI_WIDGET_QUOTES = 2;
+		
 	public static final String QUOTES_TABLE_NAME = "quotes";
 	
 	public enum QuotesColumns {
@@ -83,6 +86,7 @@ public class StocksProvider extends ContentProvider {
 	static {
 		URI_MATCHER.addURI(AUTHORITY, "quotes", URI_QUOTES);
 		URI_MATCHER.addURI(AUTHORITY, "quotes/#", URI_QUOTE);
+		URI_MATCHER.addURI(AUTHORITY, "widget_quotes/#", URI_WIDGET_QUOTES);
 	}
 
 	@Override
@@ -126,14 +130,17 @@ public class StocksProvider extends ContentProvider {
         // If the query ends in a specific record number, we're
         // being asked for a specific record, so set the
         // WHERE clause in our query.
-        if ((URI_MATCHER.match(uri)) == URI_QUOTE) {
-        	final List<String> pathSegs = uri.getPathSegments();
+		if ((URI_MATCHER.match(uri)) == URI_WIDGET_QUOTES) {
+			final List<String> pathSegs = uri.getPathSegments();
 			final int appWId = Integer.parseInt(pathSegs.get(pathSegs.size() - 1));
 			final List<String> tickers = Preferences.getPortfolio(ctx, appWId);
 			qBuilder.appendWhere("symbol in (" + prepareTickers(tickers) + ")");
-			// Log.d(TAG, "symbol in (" + prepareTickers(tickers) + ")");
 			sortOrder = buildSortOrder(tickers);
-        }                
+		} else if ((URI_MATCHER.match(uri)) == URI_QUOTE) {
+			final List<String> pathSegs = uri.getPathSegments();
+			final String quote = pathSegs.get(pathSegs.size() - 1);
+			qBuilder.appendWhere("symbol = \"" + quote.toUpperCase() + "\"");
+		}        	
         
         // Log.d(TAG, "sort order = " + sortOrder);
         
@@ -155,7 +162,7 @@ public class StocksProvider extends ContentProvider {
 	}
 	
 	public static void notifyDatabaseModification(int widgetId) {		
-		final Uri widgetUri = CONTENT_URI_MESSAGES.buildUpon().appendEncodedPath(Integer.toString(widgetId)).build();
+		final Uri widgetUri = CONTENT_URI_WIDGET_QUOTES.buildUpon().appendEncodedPath(Integer.toString(widgetId)).build();
 		ctx.getContentResolver().notifyChange(widgetUri, null);
 	}
 	
