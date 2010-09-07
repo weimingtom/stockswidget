@@ -77,10 +77,14 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		if (v.getId() == R.id.tickersList) {
 			AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-			menu.setHeaderTitle(adapter.getItem(info.position));
+			menu.setHeaderTitle(tickers.get(info.position));
 			menu.add(Menu.NONE, 0, 0, R.string.openTickerSymbol);
 			menu.add(Menu.NONE, 1, 1, R.string.editTickerSymbol);
 			menu.add(Menu.NONE, 2, 2, R.string.deleteTickerSymbol);
+			if (info.position > 0)
+				menu.add(Menu.NONE, 3, 3, R.string.moveUp);
+			if (info.position < tickers.size() - 1)
+				menu.add(Menu.NONE, 4, 4, R.string.moveDown);
 		}
 	}
 	
@@ -88,15 +92,33 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 	public boolean onContextItemSelected(MenuItem item) {
 		final AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
 		final int menuItemIndex = item.getItemId();
+		final int position = info.position;
 		switch (menuItemIndex) {
 		case 0:
-			QuoteViewActivity.openForSymbol(this, adapter.getItem(info.position));
+			QuoteViewActivity.openForSymbol(this, tickers.get(position));
 			break;
 		case 1:
-			editSymbol(info.position);
+			editSymbol(position);
 			break;
 		case 2:
-			adapter.remove(adapter.getItem(info.position));
+			tickers.remove(position);
+			adapter.notifyDataSetChanged();
+			break;
+		case 3:
+			if (position > 0) {
+				final String curValue = tickers.get(position);
+				tickers.set(position, tickers.get(position - 1));
+				tickers.set(position - 1, curValue);
+				adapter.notifyDataSetChanged();
+			}
+			break;
+		case 4:
+			if (position < tickers.size() - 1) {
+				final String curValue = tickers.get(position);
+				tickers.set(position, tickers.get(position + 1));
+				tickers.set(position + 1, curValue);
+				adapter.notifyDataSetChanged();
+			}
 			break;
 		}
 		return true;
@@ -104,7 +126,7 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		QuoteViewActivity.openForSymbol(this, adapter.getItem(position));
+		QuoteViewActivity.openForSymbol(this, tickers.get(position));
 	}
 	
 	private void editSymbol(final int position) {
@@ -117,7 +139,7 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 			alert.setTitle(R.string.addTickerSymbol);
 		else {
 			alert.setTitle(R.string.editTickerSymbol);
-			input.setText(adapter.getItem(position));
+			input.setText(tickers.get(position));
 		}
 		alert.setMessage(R.string.tickerSymbol);		  
 
@@ -126,11 +148,10 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 					public void onClick(DialogInterface dialog, int whichButton) {
 						final String value = input.getText().toString();
 						if (position == -1)
-							adapter.add(value);
-						else {
-							adapter.remove(adapter.getItem(position));
-							adapter.insert(value, position);
-						}
+							tickers.add(value);
+						else 
+							tickers.set(position, value);
+						adapter.notifyDataSetChanged();
 					}
 				});
 
@@ -145,15 +166,15 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 	}
 	
 	private void savePreferences() {
-		StringBuffer tickers = new StringBuffer();
-		final int count = adapter.getCount();
+		StringBuffer result = new StringBuffer();
+		final int count = tickers.size();
 		if (count > 0) {
-			tickers.append(adapter.getItem(0));
+			result.append(tickers.get(0));
 			for (int i = 1; i < count; i++) {
-				tickers.append(",");
-				tickers.append(adapter.getItem(i));
+				result.append(",");
+				result.append(tickers.get(i));
 			}
 		}
-		Preferences.setPortfolio(this, appWidgetId, tickers.toString());
+		Preferences.setPortfolio(this, appWidgetId, result.toString());
 	}
 }
