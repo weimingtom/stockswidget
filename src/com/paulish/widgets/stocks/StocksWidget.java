@@ -149,7 +149,7 @@ public class StocksWidget extends AppWidgetProvider {
 		result.putExtra(LauncherIntent.Extra.Scroll.EXTRA_LISTVIEW_LAYOUT_ID, R.layout.stocks_widget_list);
 		result.putExtra(LauncherIntent.Extra.Scroll.EXTRA_ITEM_LAYOUT_ID, R.layout.stocks_widget_list_item);
 		
-		putProvider(result, StocksProvider.CONTENT_URI_MESSAGES.buildUpon().appendEncodedPath(
+		putProvider(result, StocksProvider.CONTENT_URI_WIDGET_QUOTES.buildUpon().appendEncodedPath(
 				Integer.toString(appWidgetId)).toString());
 		putMapping(context, appWidgetId, result);
 
