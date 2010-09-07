@@ -14,7 +14,6 @@ public class StocksWidget extends AppWidgetProvider {
 	// Tag for logging
 	private static final String TAG = "paulish.StocksWidget";
 	// Actions
-	public static final String ACTION_WIDGET_REFRESH = "refresh";
 	public static final String ACTION_WIDGET_NOTIFY_LOADING = "notify_loading";
 	
 	@Override
@@ -31,11 +30,10 @@ public class StocksWidget extends AppWidgetProvider {
 	protected static void updateWidget(Context context, int appWidgetId, boolean loading) {
         final RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.stocks_widget);
         
-        Intent intent = new Intent(context, StocksWidget.class);
-        intent.setAction(ACTION_WIDGET_REFRESH);
+        Intent intent = new Intent(context, UpdateService.class);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
         // put appWidgetId here or intent will replace an intent of another widget
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, appWidgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getService(context, appWidgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         views.setOnClickPendingIntent(R.id.refresh_button, pendingIntent);
         
         intent = new Intent(context, ConfigurationActivity.class);
@@ -57,13 +55,7 @@ public class StocksWidget extends AppWidgetProvider {
 	public void onReceive(Context context, Intent intent) {
 		final String action = intent.getAction();
 		// Log.d(TAG, "recieved -> " +  action);
-		if (ACTION_WIDGET_REFRESH.equals(action)) {
-			final int appWidgetId = intent.getExtras().getInt(AppWidgetManager.EXTRA_APPWIDGET_ID,
-					AppWidgetManager.INVALID_APPWIDGET_ID);
-			if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
-				StocksProvider.loadFromYahooInBackgroud(appWidgetId);
-			}
-		} else if  (ACTION_WIDGET_NOTIFY_LOADING.equals(action)) {
+		if  (ACTION_WIDGET_NOTIFY_LOADING.equals(action)) {
 			final int appWidgetId = intent.getExtras().getInt(AppWidgetManager.EXTRA_APPWIDGET_ID,
 					AppWidgetManager.INVALID_APPWIDGET_ID);
 			if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
