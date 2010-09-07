@@ -16,4 +16,6 @@
 <string name="editTickerSymbol">Edit</string>
     <string name="defaultPortfolio">^FTSE,^IXIC,RTS.RS,GOOG</string>
 <string name="tickerSymbol">Ticker symbol</string>
+<string name="moveDown">Move Down</string>
+    <string name="moveUp">Move Up</string>
 </resources>
