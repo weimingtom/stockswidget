@@ -68,7 +68,7 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
             finish();            
 			break;
 		case R.id.add:
-			addSymbol();
+			editSymbol(-1);
 			break;
 		}						
 	}
@@ -79,7 +79,8 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 			AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
 			menu.setHeaderTitle(adapter.getItem(info.position));
 			menu.add(Menu.NONE, 0, 0, R.string.openTickerSymbol);
-			menu.add(Menu.NONE, 1, 1, R.string.deleteTickerSymbol);
+			menu.add(Menu.NONE, 1, 1, R.string.editTickerSymbol);
+			menu.add(Menu.NONE, 2, 2, R.string.deleteTickerSymbol);
 		}
 	}
 	
@@ -92,6 +93,9 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 			QuoteViewActivity.openForSymbol(this, adapter.getItem(info.position));
 			break;
 		case 1:
+			editSymbol(info.position);
+			break;
+		case 2:
 			adapter.remove(adapter.getItem(info.position));
 			break;
 		}
@@ -103,20 +107,30 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 		QuoteViewActivity.openForSymbol(this, adapter.getItem(position));
 	}
 	
-	private void addSymbol() {
+	private void editSymbol(final int position) {
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
-
-		alert.setTitle(R.string.addTickerSymbol);
-		alert.setMessage("Add ticker symbol");
-
 		// Set an EditText view to get user input
 		final EditText input = new EditText(this);
 		alert.setView(input);
 
+		if (position == -1)
+			alert.setTitle(R.string.addTickerSymbol);
+		else {
+			alert.setTitle(R.string.editTickerSymbol);
+			input.setText(adapter.getItem(position));
+		}
+		alert.setMessage(R.string.tickerSymbol);		  
+
 		alert.setPositiveButton(android.R.string.ok,
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
-						adapter.add(input.getText().toString());
+						final String value = input.getText().toString();
+						if (position == -1)
+							adapter.add(value);
+						else {
+							adapter.remove(adapter.getItem(position));
+							adapter.insert(value, position);
+						}
 					}
 				});
 

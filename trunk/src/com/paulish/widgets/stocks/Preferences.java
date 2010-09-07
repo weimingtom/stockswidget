@@ -15,7 +15,7 @@ public class Preferences {
     
     public static List<String> getPortfolio(Context context, int appWidgetId) {
     	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);    	
-		String commaTickers = prefs.getString(Preferences.get(Preferences.PORTFOLIO, appWidgetId), context.getString(R.string.tickersDefault));
+		String commaTickers = prefs.getString(Preferences.get(Preferences.PORTFOLIO, appWidgetId), context.getString(R.string.defaultPortfolio));
 		return new ArrayList<String>(Arrays.asList(commaTickers.split(",")));
     }
     
@@ -26,7 +26,7 @@ public class Preferences {
     	String commaTickers;
     	String[] tickers;
     	for (int appWidgetId : appWidgetIds) {
-    		commaTickers = prefs.getString(Preferences.get(Preferences.PORTFOLIO, appWidgetId), context.getString(R.string.tickersDefault));
+    		commaTickers = prefs.getString(Preferences.get(Preferences.PORTFOLIO, appWidgetId), context.getString(R.string.defaultPortfolio));
     		tickers = commaTickers.split(",");
     		for (String ticker : tickers) {
     			if (!result.contains(ticker))
