@@ -70,11 +70,13 @@ public class LauncherIntent extends Intent {
                 + "ACTION_START_TWEEN_ANIMATION";
 
         public static final String ACTION_SCROLL_WIDGET_START = PNAME
-                        + "ACTION_SCROLL_WIDGET_START";
+        		+ "ACTION_SCROLL_WIDGET_START";
         public static final String ACTION_SCROLL_WIDGET_SELECT_ITEM = PNAME
-                        + "ACTION_SCROLL_WIDGET_SELECT_ITEM";
+        		+ "ACTION_SCROLL_WIDGET_SELECT_ITEM";
         public static final String ACTION_SCROLL_WIDGET_CLOSE = PNAME
-                        + "ACTION_SCROLL_WIDGET_CLOSE";
+        		+ "ACTION_SCROLL_WIDGET_CLOSE";
+        public static final String ACTION_SCROLL_WIDGET_CLEAR_IMAGE_CACHE = PNAME
+				+ "ACTION_SCROLL_WIDGET_CLEAR_IMAGE_CACHE";
     }
 
     /**
@@ -116,7 +118,7 @@ public class LauncherIntent extends Intent {
              * - enable requery for SQL database Cursor 
              */
             public static final String EXTRA_DATA_PROVIDER_ALLOW_REQUERY = PNAME 
-                        + "EXTRA_DATA_PROVIDER_ALLOW_REQUERY";
+            		+ "EXTRA_DATA_PROVIDER_ALLOW_REQUERY";
 
             /**
              * Whether Home++ is going to add a onItemClickListener or several onClickListener on
@@ -156,12 +158,12 @@ public class LauncherIntent extends Intent {
              *   this data is sent with the ACTION_ITEM_CLICK and ACTION_VIEW_CLICK
              */
             public static final String EXTRA_ITEM_POS = PNAME + "EXTRA_ITEM_POS";
-                                
+            			
             /**
              * The position of an clicked item in the on the screen
              *   this data is sent with the ACTION_VIEW_CLICK
              */
-                        public static final String EXTRA_SOURCE_BOUNDS = PNAME + "EXTRA_ITEM_SOURCE_BOUNDS";
+			public static final String EXTRA_SOURCE_BOUNDS = PNAME + "EXTRA_ITEM_SOURCE_BOUNDS";
 
             /**
              * The uri for onItemClickListener
@@ -201,7 +203,8 @@ public class LauncherIntent extends Intent {
             }
 
         }
-
+        
+        public static final String EXTRA_APPWIDGET_ID = PNAME + "EXTRA_APPWIDGET_ID";
         public static final String EXTRA_IMAGEVIEW_ID = PNAME + "EXTRA_IMAGEVIEW_ID";
         public static final String EXTRA_ANIMATION_ID = PNAME + "EXTRA_ANIMATION_ID";
         public static final String EXTRA_VIEW_ID = PNAME + "EXTRA_VIEW_ID";
