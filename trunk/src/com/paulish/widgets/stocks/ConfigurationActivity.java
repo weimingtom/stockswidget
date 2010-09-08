@@ -2,24 +2,15 @@ package com.paulish.widgets.stocks;
 
 import java.util.List;
 
-import android.app.Activity;
-import android.app.AlertDialog;
+import android.app.*;
 import android.appwidget.AppWidgetManager;
-import android.content.DialogInterface;
-import android.content.Intent;
+import android.content.*;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.view.ContextMenu;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
+import android.view.*;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.Button;
+import android.widget.*;
 import android.widget.AdapterView.OnItemClickListener;
 
 public class ConfigurationActivity extends Activity implements OnClickListener, OnItemClickListener {
@@ -69,7 +60,8 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 			Intent resultValue = new Intent();                    
             resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
             setResult(RESULT_OK, resultValue);
-            StocksProvider.loadFromYahooInBackgroud(appWidgetId);
+            StocksProvider.loadFromYahoo(appWidgetId);
+            StocksWidget.updateService(this);
             finish();            
 			break;
 		case R.id.add:
@@ -137,6 +129,12 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 	}
 	
 	private void editSymbol(final int position) {
+		
+		// I can't find a way to create a good search dialog to lookup the
+		// yahoo symbols directly here. Seems only yahoo can do this on their website.
+		// Or we can query yahoo.finance.industry, yahoo.finance.sectors, etc tables to select
+		// a symbol from the catalog.
+		
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 		// Set an EditText view to get user input
 		final EditText input = new EditText(this);
@@ -174,20 +172,24 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 	
 	private void editUpdateInterval() {
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+		
+		// temporary. an ugly piece of code :) Just for testing.
 		final Resources res = getResources();
-
-		final int[] updateIntervalEntryValues = res.getIntArray(R.array.stocks_update_interval_entryValues);
+		final String[] updateIntervalEntryValues = res.getStringArray(R.array.stocks_update_interval_entryValues);
+		final String strInterval = Integer.toString(updateInterval);
 		int item = -1;
 		for (int i = 0; i < updateIntervalEntryValues.length; i++)
-			if (updateIntervalEntryValues[i] == updateInterval) {
+			if (updateIntervalEntryValues[i].equals(strInterval)) {
 				item = i;
 				break;
-			}		
+			};
+
 		
 		alert.setSingleChoiceItems(res.getStringArray(R.array.stocks_update_interval_entries), item,
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int which) {
-						updateInterval = updateIntervalEntryValues[which];
+						updateInterval = Integer.parseInt(updateIntervalEntryValues[which]);
+						dialog.cancel();
 					}
 				});
 				

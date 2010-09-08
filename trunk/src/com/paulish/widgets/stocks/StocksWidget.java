@@ -16,39 +16,41 @@ public class StocksWidget extends AppWidgetProvider {
 	// Actions
 	public static final String ACTION_WIDGET_NOTIFY_LOADING = "notify_loading";
 	
-	private PendingIntent serviceIntent = null;
+	private static PendingIntent serviceIntent = null;
 	
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-		// If no specific widgets requested, collect list of all		
-		
+		// If no specific widgets requested, collect list of all				
+
 		if (appWidgetIds == null) 
 			appWidgetIds = Preferences.getAllWidgetIds(context);
 
 		for (int appWidgetId : appWidgetIds) { 
         	updateWidget(context, appWidgetId, false);
-		}
-		
-		updateService(context, appWidgetIds);
+		}				
 	}
 	
-	private void updateService(Context context, int[] appWidgetIds) {
+	public static void updateService(Context context) {
 		AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 		
 		if (serviceIntent != null)
 			alarmManager.cancel(serviceIntent);
-
-		final int updateInterval = Preferences.getUpdateInterval(context) * 60 * 1000;
+		
+		final int updateInterval = Preferences.getUpdateInterval(context) * 60000;
+	
 		if (updateInterval != 0) {
-			Intent intent = new Intent(context, UpdateService.class);
-			serviceIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+			if (serviceIntent == null) {
+				Intent intent = new Intent(context, UpdateService.class);
+				serviceIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);							
+			}
+
 			alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME, 
 					SystemClock.elapsedRealtime() + updateInterval, 
 					updateInterval, serviceIntent);
 		}		
 	}
 	
-	protected static void updateWidget(Context context, int appWidgetId, boolean loading) {
+	private static void updateWidget(Context context, int appWidgetId, Boolean loading) {
         final RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.stocks_widget);
         
         Intent intent = new Intent(context, UpdateService.class);
@@ -63,10 +65,13 @@ public class StocksWidget extends AppWidgetProvider {
         pendingIntent = PendingIntent.getActivity(context, appWidgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         views.setOnClickPendingIntent(R.id.portfolio_edit_button, pendingIntent);
 
-        if (loading)
-        	views.setTextViewText(R.id.refresh_icon, " " + context.getString(R.string.loading));
-        else
-        	views.setTextViewText(R.id.refresh_icon, "");
+        // don't touch the previous state when loading is not defined
+        if (loading != null) {
+            if (loading)
+            	views.setTextViewText(R.id.refresh_icon, " " + context.getString(R.string.loading));
+            else
+            	views.setTextViewText(R.id.refresh_icon, "");
+        }
        
         final AppWidgetManager awm = AppWidgetManager.getInstance(context);
         awm.updateAppWidget(appWidgetId, views);
@@ -138,13 +143,12 @@ public class StocksWidget extends AppWidgetProvider {
 		if (intent == null)
 			return;
 
-		int appWidgetId = intent.getExtras().getInt(AppWidgetManager.EXTRA_APPWIDGET_ID,
-				AppWidgetManager.INVALID_APPWIDGET_ID);
+		int appWidgetId = intent.getExtras().getInt(LauncherIntent.Extra.EXTRA_APPWIDGET_ID, -1);
 
-		if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID)
+		if (appWidgetId < 0)
 			return;
 		
-		updateWidget(context, appWidgetId, false);
+		updateWidget(context, appWidgetId, null);
 		final Intent replaceDummy = CreateMakeScrollableIntent(context, appWidgetId);
 
 		// Send it out
@@ -159,7 +163,7 @@ public class StocksWidget extends AppWidgetProvider {
 		Intent result = new Intent(LauncherIntent.Action.ACTION_SCROLL_WIDGET_START);
 
 		// Put widget info
-		result.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+		result.putExtra(LauncherIntent.Extra.EXTRA_APPWIDGET_ID, appWidgetId);
 		result.putExtra(LauncherIntent.Extra.EXTRA_VIEW_ID, R.id.content_view);
 
 		result.putExtra(LauncherIntent.Extra.Scroll.EXTRA_DATA_PROVIDER_ALLOW_REQUERY, true);

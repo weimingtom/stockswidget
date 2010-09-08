@@ -9,9 +9,8 @@ import android.preference.PreferenceManager;
 public class Preferences {
     public static final String PORTFOLIO = "Portfolio-%d";
     // let update interval be common for all the widgets
-    public static final String UPDATE_INTERVAL = "UpdateInterval";
-    
-    private static final int DEFAULT_UPDATE_INTERVAL = 15; // 15 minutes
+    public static final String UPDATE_INTERVAL = "UpdateInterval";   
+    public static final int DEFAULT_UPDATE_INTERVAL = 15; // 15 minutes
        
     public static String get(String aPref, int aAppWidgetId) {
     	return String.format(aPref, aAppWidgetId);    	
