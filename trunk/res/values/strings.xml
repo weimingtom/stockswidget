@@ -1,21 +1,15 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <resources>
-    <string name="app_name">Stocks Widget</string>    
-    
-    
+    <string name="app_name">Stocks Widget</string>           
     <string name="save">Save</string>
-    
-    
-    
     <string name="addTickerSymbol">Add</string>
     <string name="deleteTickerSymbol">Delete</string>    
     <string name="openTickerSymbol">Open</string>
     <string name="loading">Loading...</string>
-<string name="editPortfolio">Edit Portfolio
-</string>
-<string name="editTickerSymbol">Edit</string>
+    <string name="editPortfolio">Edit Portfolio</string>
+    <string name="editTickerSymbol">Edit</string>
     <string name="defaultPortfolio">^FTSE,^IXIC,RTS.RS,GOOG</string>
-<string name="tickerSymbol">Ticker symbol</string>
-<string name="moveDown">Move Down</string>
+    <string name="tickerSymbol">Ticker symbol</string>
+    <string name="moveDown">Move Down</string>
     <string name="moveUp">Move Up</string>
 </resources>
