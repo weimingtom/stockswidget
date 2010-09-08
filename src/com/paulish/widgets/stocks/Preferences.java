@@ -8,6 +8,10 @@ import android.preference.PreferenceManager;
 
 public class Preferences {
     public static final String PORTFOLIO = "Portfolio-%d";
+    // let update interval be common for all the widgets
+    public static final String UPDATE_INTERVAL = "UpdateInterval";
+    
+    private static final int DEFAULT_UPDATE_INTERVAL = 15; // 15 minutes
        
     public static String get(String aPref, int aAppWidgetId) {
     	return String.format(aPref, aAppWidgetId);    	
@@ -43,11 +47,23 @@ public class Preferences {
     	edit.commit();
     }
     
+    public static int getUpdateInterval(Context context) {
+    	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);    	
+		return prefs.getInt(Preferences.UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL);
+    }
+    
+    public static void setUpdateInterval(Context context, int interval) {
+    	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+    	Editor edit = prefs.edit();
+    	edit.putInt(Preferences.UPDATE_INTERVAL, interval);
+    	edit.commit();    	
+    }
+    
     public static void DropSettings(Context context, int[] appWidgetIds) {
     	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		Editor edit = prefs.edit();
 		for(int appWidgetId : appWidgetIds) {
-			edit.remove(Preferences.get(Preferences.PORTFOLIO, appWidgetId));
+			edit.remove(Preferences.get(Preferences.PORTFOLIO, appWidgetId));			
 		}
 		edit.commit();
     }

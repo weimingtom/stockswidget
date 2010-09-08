@@ -1,10 +1,10 @@
 package com.paulish.widgets.stocks;
 
 import mobi.intuitit.android.content.LauncherIntent;
-import android.app.PendingIntent;
+import android.app.*;
 import android.appwidget.*;
-import android.content.Context;
-import android.content.Intent;
+import android.content.*;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.RemoteViews;
@@ -16,6 +16,8 @@ public class StocksWidget extends AppWidgetProvider {
 	// Actions
 	public static final String ACTION_WIDGET_NOTIFY_LOADING = "notify_loading";
 	
+	private PendingIntent serviceIntent = null;
+	
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
 		// If no specific widgets requested, collect list of all		
@@ -23,8 +25,27 @@ public class StocksWidget extends AppWidgetProvider {
 		if (appWidgetIds == null) 
 			appWidgetIds = Preferences.getAllWidgetIds(context);
 
-		for (int appWidgetId : appWidgetIds) 
-        	updateWidget(context, appWidgetId, false);           
+		for (int appWidgetId : appWidgetIds) { 
+        	updateWidget(context, appWidgetId, false);
+		}
+		
+		updateService(context, appWidgetIds);
+	}
+	
+	private void updateService(Context context, int[] appWidgetIds) {
+		AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+		
+		if (serviceIntent != null)
+			alarmManager.cancel(serviceIntent);
+
+		final int updateInterval = Preferences.getUpdateInterval(context) * 60 * 1000;
+		if (updateInterval != 0) {
+			Intent intent = new Intent(context, UpdateService.class);
+			serviceIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+			alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME, 
+					SystemClock.elapsedRealtime() + updateInterval, 
+					updateInterval, serviceIntent);
+		}		
 	}
 	
 	protected static void updateWidget(Context context, int appWidgetId, boolean loading) {
@@ -48,13 +69,13 @@ public class StocksWidget extends AppWidgetProvider {
         	views.setTextViewText(R.id.refresh_icon, "");
        
         final AppWidgetManager awm = AppWidgetManager.getInstance(context);
-        awm.updateAppWidget(appWidgetId, views); 
+        awm.updateAppWidget(appWidgetId, views);
 	}
 		
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		final String action = intent.getAction();
-		// Log.d(TAG, "recieved -> " +  action);
+		// Log.d(TAG, "received -> " +  action);
 		if  (ACTION_WIDGET_NOTIFY_LOADING.equals(action)) {
 			final int appWidgetId = intent.getExtras().getInt(AppWidgetManager.EXTRA_APPWIDGET_ID,
 					AppWidgetManager.INVALID_APPWIDGET_ID);
@@ -87,11 +108,17 @@ public class StocksWidget extends AppWidgetProvider {
 	}
 
 	/**
-	 * Will be executed when the widget is removed from the homescreen 
+	 * Will be executed when the widget is removed from the home screen 
 	 */
 	@Override
 	public void onDeleted(Context context, int[] appWidgetIds) {
 		super.onDeleted(context, appWidgetIds);
+		// Remove the service
+		if (serviceIntent != null) {
+			((AlarmManager) context.getSystemService(Context.ALARM_SERVICE)).cancel(serviceIntent);
+			serviceIntent = null;
+		}
+		
 		// Drop the settings if the widget is deleted
 		Preferences.DropSettings(context, appWidgetIds);
 	}	
@@ -114,7 +141,7 @@ public class StocksWidget extends AppWidgetProvider {
 		int appWidgetId = intent.getExtras().getInt(AppWidgetManager.EXTRA_APPWIDGET_ID,
 				AppWidgetManager.INVALID_APPWIDGET_ID);
 
-		if (appWidgetId < 0)
+		if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID)
 			return;
 		
 		updateWidget(context, appWidgetId, false);
@@ -250,6 +277,6 @@ public class StocksWidget extends AppWidgetProvider {
 		for (int appWidgetId : appWidgetIds) {
 			intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
 			context.sendBroadcast(intent);
-		}
+		}		
 	}
 }

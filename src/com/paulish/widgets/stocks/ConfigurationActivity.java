@@ -7,6 +7,7 @@ import android.app.AlertDialog;
 import android.appwidget.AppWidgetManager;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -25,7 +26,8 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 	
 	private List<String> tickers;
 	private ArrayAdapter<String> adapter;
-	private int appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;	
+	private int appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
+	private int updateInterval;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {	
@@ -34,12 +36,14 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 		setContentView(R.layout.stocks_widget_portfolio_edit);
 		findViewById(R.id.add).setOnClickListener(this);
 		findViewById(R.id.save).setOnClickListener(this);
+		findViewById(R.id.Button01).setOnClickListener(this);
 		Button btn = (Button)findViewById(R.id.cancel);
 		btn.setText(android.R.string.cancel);
-		btn.setOnClickListener(this);		
+		btn.setOnClickListener(this);
+		
 		
 		final ListView tickersList = (ListView)findViewById(R.id.tickersList);
-		registerForContextMenu(tickersList);
+		registerForContextMenu(tickersList);		
 		tickersList.setOnItemClickListener(this);
 
 		// prepare the listview
@@ -49,6 +53,7 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 			tickers = Preferences.getPortfolio(this, appWidgetId);
 			adapter = new ArrayAdapter<String>(this, R.layout.stocks_widget_portfolio_edit_list_item, tickers);
 			tickersList.setAdapter(adapter);
+			updateInterval = Preferences.getUpdateInterval(this);
 		} else
 			finish();
 	}
@@ -70,6 +75,8 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 		case R.id.add:
 			editSymbol(-1);
 			break;
+		case R.id.Button01:
+			editUpdateInterval();
 		}						
 	}
 
@@ -165,6 +172,28 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 		alert.show();
 	}
 	
+	private void editUpdateInterval() {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+		final Resources res = getResources();
+
+		final int[] updateIntervalEntryValues = res.getIntArray(R.array.stocks_update_interval_entryValues);
+		int item = -1;
+		for (int i = 0; i < updateIntervalEntryValues.length; i++)
+			if (updateIntervalEntryValues[i] == updateInterval) {
+				item = i;
+				break;
+			}		
+		
+		alert.setSingleChoiceItems(res.getStringArray(R.array.stocks_update_interval_entries), item,
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						updateInterval = updateIntervalEntryValues[which];
+					}
+				});
+				
+		alert.show();
+	}
+	
 	private void savePreferences() {
 		StringBuffer result = new StringBuffer();
 		final int count = tickers.size();
@@ -176,5 +205,6 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 			}
 		}
 		Preferences.setPortfolio(this, appWidgetId, result.toString());
+		Preferences.setUpdateInterval(this, updateInterval);
 	}
 }

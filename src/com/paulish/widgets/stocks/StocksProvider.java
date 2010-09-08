@@ -37,11 +37,30 @@ public class StocksProvider extends ContentProvider {
 		
 		@Override
 		protected Void doInBackground(Integer... appWidgetIds) {
-			StocksWidget.setLoading(ctx, appWidgetIds, true);
-			this.appWidgetIds = appWidgetIds;
-			for (int appWidgetId : appWidgetIds) {
-			   StocksProvider.loadFromYahoo(appWidgetId);
-			}
+			
+			// check that all passed widgets <> 0, else update all the widgets
+			boolean isNull = appWidgetIds == null;
+			if (!isNull)
+				for (Integer appWidgetId : appWidgetIds)
+					if (appWidgetId == null) {
+						isNull = true;
+						break;
+					}					
+			
+			if (isNull) {
+				final int[] tmpWidgetIds = Preferences.getAllWidgetIds(ctx);
+				this.appWidgetIds = new Integer[tmpWidgetIds.length];
+				for (int i = 0; i < tmpWidgetIds.length; i++)
+					this.appWidgetIds[i] = tmpWidgetIds[i];
+            } else
+				this.appWidgetIds = appWidgetIds;
+			StocksWidget.setLoading(ctx, this.appWidgetIds, true);
+			if (isNull)
+				StocksProvider.loadFromYahoo((Integer)null);
+			else
+				for (int appWidgetId : appWidgetIds) {
+					   StocksProvider.loadFromYahoo(appWidgetId);
+					}
 			return null;
 		}
 				
