@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">Stocks Widget</string>           
     <string name="save">Save</string>
-    <string name="addTickerSymbol">Add</string>
+    <string name="addTickerSymbol">Add Symbol...</string>
     <string name="deleteTickerSymbol">Delete</string>    
     <string name="openTickerSymbol">Open</string>
     <string name="loading">Loading...</string>

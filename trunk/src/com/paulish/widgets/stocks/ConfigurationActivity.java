@@ -25,24 +25,23 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 		super.onCreate(savedInstanceState);
 		setTitle(R.string.editPortfolio);
 		setContentView(R.layout.stocks_widget_portfolio_edit);
-		findViewById(R.id.add).setOnClickListener(this);
 		findViewById(R.id.save).setOnClickListener(this);
-		findViewById(R.id.Button01).setOnClickListener(this);
+		findViewById(R.id.updateInterval).setOnClickListener(this);
 		Button btn = (Button)findViewById(R.id.cancel);
 		btn.setText(android.R.string.cancel);
-		btn.setOnClickListener(this);
-		
+		btn.setOnClickListener(this);			
 		
 		final ListView tickersList = (ListView)findViewById(R.id.tickersList);
 		registerForContextMenu(tickersList);		
 		tickersList.setOnItemClickListener(this);
-
+		
 		// prepare the listview
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID);
 			tickers = Preferences.getPortfolio(this, appWidgetId);
 			adapter = new ArrayAdapter<String>(this, R.layout.stocks_widget_portfolio_edit_list_item, tickers);
+			adapter.add(getString(R.string.addTickerSymbol));
 			tickersList.setAdapter(adapter);
 			updateInterval = Preferences.getUpdateInterval(this);
 		} else
@@ -60,14 +59,11 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 			Intent resultValue = new Intent();                    
             resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
             setResult(RESULT_OK, resultValue);
-            StocksProvider.loadFromYahoo(appWidgetId);
+            StocksProvider.loadFromYahooInBackgroud(appWidgetId);
             StocksWidget.updateService(this);
             finish();            
 			break;
-		case R.id.add:
-			editSymbol(-1);
-			break;
-		case R.id.Button01:
+		case R.id.updateInterval:
 			editUpdateInterval();
 		}						
 	}
@@ -76,14 +72,17 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		if (v.getId() == R.id.tickersList) {
 			AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-			menu.setHeaderTitle(tickers.get(info.position));
-			menu.add(Menu.NONE, 0, 0, R.string.openTickerSymbol);
-			menu.add(Menu.NONE, 1, 1, R.string.editTickerSymbol);
-			menu.add(Menu.NONE, 2, 2, R.string.deleteTickerSymbol);
-			if (info.position > 0)
-				menu.add(Menu.NONE, 3, 3, R.string.moveUp);
-			if (info.position < tickers.size() - 1)
-				menu.add(Menu.NONE, 4, 4, R.string.moveDown);
+			
+			if (info.position != tickers.size() - 1) {			
+				menu.setHeaderTitle(tickers.get(info.position));
+				menu.add(Menu.NONE, 0, 0, R.string.openTickerSymbol);
+				menu.add(Menu.NONE, 1, 1, R.string.editTickerSymbol);
+				menu.add(Menu.NONE, 2, 2, R.string.deleteTickerSymbol);
+				if (info.position > 0)
+					menu.add(Menu.NONE, 3, 3, R.string.moveUp);
+				if (info.position < tickers.size() - 2)
+					menu.add(Menu.NONE, 4, 4, R.string.moveDown);
+			}
 		}
 	}
 	
@@ -112,7 +111,7 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 			}
 			break;
 		case 4:
-			if (position < tickers.size() - 1) {
+			if (position < tickers.size() - 2) {
 				final String curValue = tickers.get(position);
 				tickers.set(position, tickers.get(position + 1));
 				tickers.set(position + 1, curValue);
@@ -125,7 +124,10 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		QuoteViewActivity.openForSymbol(this, tickers.get(position));
+		if (position == tickers.size() - 1)
+			editSymbol(-1);
+		else
+			QuoteViewActivity.openForSymbol(this, tickers.get(position));
 	}
 	
 	private void editSymbol(final int position) {
@@ -153,7 +155,7 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 					public void onClick(DialogInterface dialog, int whichButton) {
 						final String value = input.getText().toString();
 						if (position == -1)
-							tickers.add(value);
+							adapter.insert(value, tickers.size() - 1);
 						else 
 							tickers.set(position, value);
 						adapter.notifyDataSetChanged();
@@ -199,9 +201,9 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 	private void savePreferences() {
 		StringBuffer result = new StringBuffer();
 		final int count = tickers.size();
-		if (count > 0) {
+		if (count > 1) {
 			result.append(tickers.get(0));
-			for (int i = 1; i < count; i++) {
+			for (int i = 1; i < count - 1; i++) {
 				result.append(",");
 				result.append(tickers.get(i));
 			}
