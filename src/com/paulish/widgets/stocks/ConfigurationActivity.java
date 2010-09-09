@@ -60,7 +60,7 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
             resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
             setResult(RESULT_OK, resultValue);
             StocksProvider.loadFromYahooInBackgroud(appWidgetId);
-            StocksWidget.updateService(this);
+            UpdateService.registerService(this);
             finish();            
 			break;
 		case R.id.updateInterval:

@@ -4,7 +4,6 @@ import mobi.intuitit.android.content.LauncherIntent;
 import android.app.*;
 import android.appwidget.*;
 import android.content.*;
-import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.RemoteViews;
@@ -15,8 +14,6 @@ public class StocksWidget extends AppWidgetProvider {
 	private static final String TAG = "paulish.StocksWidget";
 	// Actions
 	public static final String ACTION_WIDGET_NOTIFY_LOADING = "notify_loading";
-	
-	private static PendingIntent serviceIntent = null;
 	
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
@@ -29,27 +26,7 @@ public class StocksWidget extends AppWidgetProvider {
         	updateWidget(context, appWidgetId, false);
 		}				
 	}
-	
-	public static void updateService(Context context) {
-		AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 		
-		if (serviceIntent != null)
-			alarmManager.cancel(serviceIntent);
-		
-		final int updateInterval = Preferences.getUpdateInterval(context) * 60000;
-	
-		if (updateInterval != 0) {
-			if (serviceIntent == null) {
-				Intent intent = new Intent(context, UpdateService.class);
-				serviceIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);							
-			}
-
-			alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME, 
-					SystemClock.elapsedRealtime() + updateInterval, 
-					updateInterval, serviceIntent);
-		}		
-	}
-	
 	private static void updateWidget(Context context, int appWidgetId, Boolean loading) {
         final RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.stocks_widget);
         
@@ -118,11 +95,10 @@ public class StocksWidget extends AppWidgetProvider {
 	@Override
 	public void onDeleted(Context context, int[] appWidgetIds) {
 		super.onDeleted(context, appWidgetIds);
-		// Remove the service
-		if (serviceIntent != null) {
-			((AlarmManager) context.getSystemService(Context.ALARM_SERVICE)).cancel(serviceIntent);
-			serviceIntent = null;
-		}
+		
+		// if we have no more widgets then stop the service
+		if (Preferences.getAllWidgetIds(context).length == 0)
+			UpdateService.removeService(context);
 		
 		// Drop the settings if the widget is deleted
 		Preferences.DropSettings(context, appWidgetIds);
