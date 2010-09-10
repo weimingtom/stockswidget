@@ -15,6 +15,10 @@ import android.widget.AdapterView.OnItemClickListener;
 
 public class ConfigurationActivity extends Activity implements OnClickListener, OnItemClickListener {
 	
+/*	private class TickersPreference extends Preference {
+		
+	}
+*/	
 	private List<String> tickers;
 	private ArrayAdapter<String> adapter;
 	private int appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
@@ -138,7 +142,7 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 		// a symbol from the catalog.
 		
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
-		// Set an EditText view to get user input
+		// Set an EditText view to get user input		
 		final EditText input = new EditText(this);
 		alert.setView(input);
 
