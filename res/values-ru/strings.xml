@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+<string name="tickerSymbol">Символ акции</string>
+    <string name="save">Сохранить</string>
+    <string name="deleteTickerSymbol">Удалить</string>
+    <string name="loading">Загрузка...</string>
+    <string name="addTickerSymbol">Добавить символ...</string>
+    <string name="moveDown">Переместить вниз</string>
+    <string name="editTickerSymbol">Редактировать</string>
+    <string name="moveUp">Переместить вверх</string>
+    <string name="editPortfolio">Редактировать портфель</string>
+    <string name="openTickerSymbol">Открыть</string>
+    <string name="updateInterval">Обновлять</string>
+    <string name="stocks">Акции</string>
+    <string name="app_name">Виджет Акций</string>
+    <string name="stocksScrollable">Акции (прокручиваемый)</string>
+    <string name="stocksSingle">Акции (одна)</string>
+</resources>

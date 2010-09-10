@@ -12,4 +12,8 @@
     <string name="tickerSymbol">Ticker symbol</string>
     <string name="moveDown">Move Down</string>
     <string name="moveUp">Move Up</string>
+    <string name="updateInterval">Update interval</string>
+    <string name="stocks">Stocks</string>
+    <string name="stocksScrollable">Stocks (scrollable)</string>
+    <string name="stocksSingle">Stocks (single)</string>
 </resources>
