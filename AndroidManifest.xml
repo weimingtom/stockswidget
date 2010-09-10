@@ -10,12 +10,14 @@
         <receiver android:label="@string/stocksScrollable" android:name=".receivers.StocksWidgetScrollable">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+                <action android:name="com.paulish.widgets.stocks.action.NOTIFY_LOADING"/>
             </intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/stocks_widget_provider_scrollable"/>
         </receiver>
         <receiver android:label="@string/stocksSingle" android:name=".receivers.StocksWidgetSingle">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+                <action android:name="com.paulish.widgets.stocks.action.NOTIFY_LOADING"/>
             </intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/stocks_widget_provider_single"/>
         </receiver>
