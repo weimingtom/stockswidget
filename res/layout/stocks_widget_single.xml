@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_weight="1.0">
+        <ImageView android:id="@+id/stateImage" android:layout_width="100.0px" android:layout_height="fill_parent" />
+        <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="fill_parent">
+            <TextView android:layout_gravity="top" android:id="@+id/quotePrice" android:layout_width="fill_parent" android:layout_height="wrap_content" />
+            <TextView android:layout_gravity="center_vertical" android:id="@+id/quoteChangePercent" android:layout_width="fill_parent" android:layout_height="wrap_content" />
+            <TextView android:layout_gravity="bottom" android:id="@+id/quoteChange" android:layout_width="fill_parent" android:layout_height="wrap_content" />
+        </LinearLayout>
+    </LinearLayout>
+    <TextView android:gravity="center" android:id="@+id/quoteSymbol" android:layout_width="fill_parent" android:layout_height="wrap_content" />
+</LinearLayout>
