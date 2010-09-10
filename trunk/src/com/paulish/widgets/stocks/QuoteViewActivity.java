@@ -45,10 +45,14 @@ public class QuoteViewActivity extends Activity{
             finish();
 	}
 	
-	public static void openForSymbol(Context context, String symbol) {
+	public static Intent getOpenForSymbolIntent(Context context, String symbol) {
 		final Intent quoteViewIntent = new Intent(context, QuoteViewActivity.class);
 		quoteViewIntent.putExtra(QuoteViewActivity.EXTRA_QUOTE_SYMBOL, symbol);
 		quoteViewIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		context.startActivity(quoteViewIntent);		
+		return quoteViewIntent;
+	}
+	
+	public static void openForSymbol(Context context, String symbol) {
+		context.startActivity(getOpenForSymbolIntent(context, symbol));		
 	}
 }

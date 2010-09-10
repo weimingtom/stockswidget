@@ -92,7 +92,7 @@ public class StocksProvider extends ContentProvider {
 		QuotesColumns.price.toString(), 
 		"CASE WHEN change is NULL THEN \"\" WHEN change > 0 THEN \"+\" || change ELSE \"\" || change END as " + QuotesColumns.change.toString(),
 		"CASE WHEN pchange is NULL THEN \"\" ELSE pchange END as " + QuotesColumns.pchange.toString(),
-		"CASE WHEN change IS NULL THEN " + Integer.toString(R.drawable.stocks_widget_state_black) + 
+		"CASE WHEN change IS NULL THEN " + Integer.toString(R.drawable.stocks_widget_state_gray) + 
 		    " WHEN change = 0 THEN " + Integer.toString(R.drawable.stocks_widget_state_gray) + 
 		    " WHEN change < 0 THEN " + Integer.toString(R.drawable.stocks_widget_state_red) + 
 		    " ELSE " + Integer.toString(R.drawable.stocks_widget_state_green) + " END as " + QuotesColumns.stateimage.toString()

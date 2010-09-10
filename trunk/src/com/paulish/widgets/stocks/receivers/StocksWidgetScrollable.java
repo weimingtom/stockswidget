@@ -44,6 +44,7 @@ public class StocksWidgetScrollable extends StocksWidget{
 	@Override 
 	public void onReceive(Context context, Intent intent) {
 		final String action = intent.getAction();
+		//Log.d(TAG, "received -> " +  action);
 		if (TextUtils.equals(action, LauncherIntent.Action.ACTION_READY)) {
 			// Receive ready signal
 			// Log.d(TAG, "widget ready");
@@ -59,8 +60,8 @@ public class StocksWidgetScrollable extends StocksWidget{
 		} else if (TextUtils.equals(action, LauncherIntent.Error.ERROR_SCROLL_CURSOR)) {
 			// An error occurred
 		    Log.d(TAG, intent.getStringExtra(LauncherIntent.Extra.EXTRA_ERROR_MESSAGE));
-		} else		
-		super.onReceive(context, intent);
+		} else
+			super.onReceive(context, intent);
 	}
 	
 	/**
