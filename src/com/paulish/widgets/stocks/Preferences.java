@@ -8,6 +8,7 @@ import android.preference.PreferenceManager;
 
 public class Preferences {
     public static final String PORTFOLIO = "Portfolio-%d";
+    public static final String CURRENT_INDEX = "CurrentIndex-%d";
     // let update interval be common for all the widgets
     public static final String UPDATE_INTERVAL = "UpdateInterval";   
     public static final int DEFAULT_UPDATE_INTERVAL = 15; // 15 minutes
@@ -58,11 +59,24 @@ public class Preferences {
     	edit.commit();    	
     }
     
+    public static int getCurrentIndex(Context context, int appWidgetId) {
+    	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);    	
+		return prefs.getInt(Preferences.get(Preferences.CURRENT_INDEX, appWidgetId), 0);    	
+    }
+    
+    public static void setCurrentIndex(Context context, int appWidgetId, int currentIndex) {
+    	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);    	
+    	Editor edit = prefs.edit();
+    	edit.putInt(Preferences.get(Preferences.CURRENT_INDEX, appWidgetId), currentIndex);
+    	edit.commit();    	
+    }
+    
     public static void DropSettings(Context context, int[] appWidgetIds) {
     	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		Editor edit = prefs.edit();
 		for(int appWidgetId : appWidgetIds) {
-			edit.remove(Preferences.get(Preferences.PORTFOLIO, appWidgetId));			
+			edit.remove(Preferences.get(Preferences.PORTFOLIO, appWidgetId));
+			edit.remove(Preferences.get(Preferences.CURRENT_INDEX, appWidgetId));
 		}
 		edit.commit();
     }
