@@ -6,8 +6,10 @@
         <ImageView android:layout_width="1px" android:layout_height="fill_parent" android:background="@drawable/divider"/>
         <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_margin="4dip">
             <TextView android:textColor="#FFF" android:id="@+id/quotePrice" android:layout_width="fill_parent" android:layout_height="0dip" android:layout_weight="1" android:gravity="center_vertical"/>
-            <TextView android:textColor="#FFF" android:id="@+id/quoteChangePercent" android:layout_width="fill_parent" android:layout_height="0dip" android:layout_weight="1" android:gravity="center_vertical"/>
-            <TextView android:textColor="#FFF" android:id="@+id/quoteChange" android:layout_width="fill_parent" android:layout_height="0dip" android:layout_weight="1" android:gravity="center_vertical"/>
+        	<LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="0dip" android:layout_weight="1">
+            	<TextView android:textColor="#FFF" android:id="@+id/quoteChangePercent" android:layout_height="fill_parent" android:layout_width="0dip" android:layout_weight="1" android:gravity="center_vertical"/>
+            	<TextView android:textColor="#FFF" android:id="@+id/quoteChange" android:layout_height="fill_parent" android:layout_width="0dip" android:layout_weight="1" android:gravity="center_vertical"/>
+        	</LinearLayout>            
         </LinearLayout>
     </LinearLayout>
     <ImageView android:layout_height="1px" android:layout_width="fill_parent" android:background="@drawable/divider"/>
