@@ -1,93 +1,69 @@
 package com.paulish.widgets.stocks.receivers;
 
-import java.util.HashMap;
-
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.util.Log;
 import android.widget.RemoteViews;
 
+import com.paulish.widgets.stocks.Preferences;
 import com.paulish.widgets.stocks.QuoteViewActivity;
 import com.paulish.widgets.stocks.R;
 import com.paulish.widgets.stocks.StocksProvider;
 import com.paulish.widgets.stocks.StocksWidget;
 
-public class StocksWidgetSingle extends StocksWidget /*implements OnTouchListener*/ {
-	
-	private class CursorCache {
-		private int appWidgetId;
-		public int currentIndex = -1;
-		public Cursor cursor = null;
-		
-		public CursorCache(int appWidgetId) {
-			this.appWidgetId = appWidgetId;
-		}
-		
-		protected void finalize(){
-			if (cursor != null) {
-				cursor.close();
-				cursor = null;
-			}
-		}
-		
-		public Cursor prepareCursor(Context context) {
-			if (cursor == null) {
-				// query the data
-				Uri quotes = StocksProvider.CONTENT_URI_WIDGET_QUOTES.buildUpon().appendEncodedPath(
-						Integer.toString(appWidgetId)).build();
-				
-				cursor = context.getContentResolver().query(quotes, StocksProvider.PROJECTION_QUOTES, null, null, null);				
-			}
-			
-			if (cursor != null) {
-				final int lastIndex = cursor.getCount() - 1;
-				if (currentIndex > lastIndex)
-					currentIndex = 0;
-				if (currentIndex == -1)
-					currentIndex = lastIndex;
+public class StocksWidgetSingle extends StocksWidget {
 
-				if (!cursor.moveToPosition(currentIndex))
-					return null;				
-			}
-			
-			return cursor;
-		}
-	}
-	
-	private HashMap<Integer, CursorCache> cache;
+	// Actions
+	public static final String ACTION_SHOW_NEXT = "com.paulish.widgets.stocks.action.SHOW_NEXT";
+	public static final String ACTION_SHOW_PREV = "com.paulish.widgets.stocks.action.SHOW_PREV";
 	
 	@Override
 	protected void updateWidget(Context context, int appWidgetId, Boolean loading) {
         final RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.stocks_widget_single);
         
         updateWidgetData(context, appWidgetId, loading, views);
+        
+        Intent intent = new Intent(context, StocksWidgetSingle.class);
+        intent.setAction(ACTION_SHOW_NEXT);
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+        views.setOnClickPendingIntent(R.id.quoteSymbol, 
+        		PendingIntent.getBroadcast(context, appWidgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT));
+        
         final AppWidgetManager awm = AppWidgetManager.getInstance(context);        
         awm.updateAppWidget(appWidgetId, views);		
 	}
-	
+		
 	private void updateWidgetData(Context context, int appWidgetId, Boolean loading, RemoteViews views) {
 		if (loading)
 			return;
+				
+		// query the data
+		Uri quotes = StocksProvider.CONTENT_URI_WIDGET_QUOTES.buildUpon().appendEncodedPath(
+				Integer.toString(appWidgetId)).build();
 		
-		CursorCache cursorCache = null;
-		// get the cursor from cache
-		if (cache == null)
-			cache = new HashMap<Integer, CursorCache>();
+		final ContentResolver resolver = context.getContentResolver();
+		Cursor cur = resolver.query(quotes, StocksProvider.PROJECTION_QUOTES, null, null, null);
 		
-		cursorCache = cache.get(appWidgetId);
+		int currentIndex = Preferences.getCurrentIndex(context, appWidgetId);
 		
-		if (cursorCache == null) {
-			cursorCache = new CursorCache(appWidgetId);
-			cursorCache.currentIndex = 0;
-			cache.put(appWidgetId, cursorCache);
+		if (cur != null) {
+			final int lastIndex = cur.getCount() - 1;
+			if (currentIndex > lastIndex) {
+				currentIndex = 0;
+				Preferences.setCurrentIndex(context, appWidgetId, currentIndex);
+			}
+			if (currentIndex == -1) {
+				currentIndex = lastIndex;
+				Preferences.setCurrentIndex(context, appWidgetId, currentIndex);
+			}
 		}
 		
-		Cursor cur = cursorCache.prepareCursor(context);
-		if (cur != null) {						
+		if (cur != null) {
+			cur.moveToPosition(currentIndex);
 			final String symbol = cur.getString(StocksProvider.QuotesColumns.symbol.ordinal());
 			
 			views.setTextViewText(R.id.quoteSymbol, symbol);
@@ -105,6 +81,7 @@ public class StocksWidgetSingle extends StocksWidget /*implements OnTouchListene
 				views.setImageViewResource(R.id.stateImage, R.drawable.stocks_widget_arrow_zero);
 				break;
 			}
+			
 			cur.close();
 
 			Intent openForSymbolIntent = QuoteViewActivity.getOpenForSymbolIntent(context, symbol);
@@ -122,12 +99,26 @@ public class StocksWidgetSingle extends StocksWidget /*implements OnTouchListene
 	}
 
 	@Override
-	public void onDeleted(Context context, int[] appWidgetIds) {
-		if (cache != null)
-			for (int appWidgetId : appWidgetIds)
-				cache.remove(appWidgetId);
-		
-		super.onDeleted(context, appWidgetIds);		
+	public void onReceive(Context context, Intent intent) {
+		final String action = intent.getAction();
+		if  (ACTION_SHOW_NEXT.equals(action)) {
+			final int appWidgetId = intent.getExtras().getInt(AppWidgetManager.EXTRA_APPWIDGET_ID,	AppWidgetManager.INVALID_APPWIDGET_ID);
+			if ((appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) && appWidgetClassMatch(context, appWidgetId)) {
+				changeCurrent(context, appWidgetId, 1);
+			}			
+		} else if  (ACTION_SHOW_PREV.equals(action)) {
+			final int appWidgetId = intent.getExtras().getInt(AppWidgetManager.EXTRA_APPWIDGET_ID,	AppWidgetManager.INVALID_APPWIDGET_ID);
+			if ((appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) && appWidgetClassMatch(context, appWidgetId)) {
+				changeCurrent(context, appWidgetId, -1);
+			}			
+		} else
+		super.onReceive(context, intent);
+	}
+	
+	private void changeCurrent(Context context, int appWidgetId, int delta) {
+		final int currentIndex = Preferences.getCurrentIndex(context, appWidgetId);
+		Preferences.setCurrentIndex(context, appWidgetId, currentIndex + delta);
+		updateWidget(context, appWidgetId, false);
 	}
 
 }
