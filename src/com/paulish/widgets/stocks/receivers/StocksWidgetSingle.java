@@ -30,7 +30,7 @@ public class StocksWidgetSingle extends StocksWidget {
         Intent intent = new Intent(context, StocksWidgetSingle.class);
         intent.setAction(ACTION_SHOW_NEXT);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
-        views.setOnClickPendingIntent(R.id.quoteSymbol, 
+        views.setOnClickPendingIntent(R.id.stateImage, 
         		PendingIntent.getBroadcast(context, appWidgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT));
         
         final AppWidgetManager awm = AppWidgetManager.getInstance(context);        
@@ -62,8 +62,7 @@ public class StocksWidgetSingle extends StocksWidget {
 			}
 		}
 		
-		if (cur != null) {
-			cur.moveToPosition(currentIndex);
+		if ((cur != null) && (cur.moveToPosition(currentIndex))) {
 			final String symbol = cur.getString(StocksProvider.QuotesColumns.symbol.ordinal());
 			
 			views.setTextViewText(R.id.quoteSymbol, symbol);
@@ -82,8 +81,6 @@ public class StocksWidgetSingle extends StocksWidget {
 				break;
 			}
 			
-			cur.close();
-
 			Intent openForSymbolIntent = QuoteViewActivity.getOpenForSymbolIntent(context, symbol);
 	        views.setOnClickPendingIntent(R.id.widgetLayout, 
 	        		PendingIntent.getActivity(context, appWidgetId, openForSymbolIntent, PendingIntent.FLAG_UPDATE_CURRENT));
@@ -95,7 +92,10 @@ public class StocksWidgetSingle extends StocksWidget {
 			views.setTextViewText(R.id.quoteChangePercent, "0.0%");
 			views.setTextViewText(R.id.quoteChange, "0.0");
 			views.setImageViewResource(R.id.stateImage, R.drawable.stocks_widget_arrow_zero);			
-		}			
+		}
+		
+		if (cur != null)
+			cur.close();
 	}
 
 	@Override
