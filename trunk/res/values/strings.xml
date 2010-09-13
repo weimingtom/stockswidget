@@ -15,5 +15,5 @@
     <string name="updateInterval">Update interval</string>
     <string name="stocks">Stocks</string>
     <string name="stocksScrollable">Stocks (scrollable)</string>
-    <string name="stocksSingle">Stocks (single)</string>
+    <string name="stocksSingle">Stocks (small)</string>
 </resources>

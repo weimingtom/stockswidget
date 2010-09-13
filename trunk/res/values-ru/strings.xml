@@ -14,5 +14,5 @@
     <string name="stocks">Акции</string>
     <string name="app_name">Виджет Акций</string>
     <string name="stocksScrollable">Акции (прокручиваемый)</string>
-    <string name="stocksSingle">Акции (одна)</string>
+    <string name="stocksSingle">Акции (маленький)</string>
 </resources>
