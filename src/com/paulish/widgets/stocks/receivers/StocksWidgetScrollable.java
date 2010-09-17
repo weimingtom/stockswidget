@@ -95,6 +95,15 @@ public class StocksWidgetScrollable extends StocksWidget{
 	 */
 	public Intent CreateMakeScrollableIntent(Context context, int appWidgetId) {
 		// Log.d(TAG, "creating ACTION_SCROLL_WIDGET_START intent");
+		
+		String widgetUri = StocksProvider.CONTENT_URI_WIDGET_QUOTES.buildUpon().appendEncodedPath(
+				Integer.toString(appWidgetId)).toString();
+		
+		Intent clearIntent = new Intent(LauncherIntent.Action.ACTION_SCROLL_WIDGET_CLOSE);
+		clearIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+		clearIntent.putExtra(LauncherIntent.Extra.Scroll.EXTRA_DATA_URI, widgetUri);
+		context.sendBroadcast(clearIntent);
+		
 		Intent result = new Intent(LauncherIntent.Action.ACTION_SCROLL_WIDGET_START);
 
 		// Put widget info
@@ -107,8 +116,7 @@ public class StocksWidgetScrollable extends StocksWidget{
 		result.putExtra(LauncherIntent.Extra.Scroll.EXTRA_LISTVIEW_LAYOUT_ID, R.layout.stocks_widget_list);
 		result.putExtra(LauncherIntent.Extra.Scroll.EXTRA_ITEM_LAYOUT_ID, R.layout.stocks_widget_list_item);
 		
-		putProvider(result, StocksProvider.CONTENT_URI_WIDGET_QUOTES.buildUpon().appendEncodedPath(
-				Integer.toString(appWidgetId)).toString());
+		putProvider(result, widgetUri);
 		putMapping(context, appWidgetId, result);
 
 		// Launcher can set onClickListener for each children of an item. Without
