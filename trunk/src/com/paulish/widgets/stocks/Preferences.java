@@ -7,7 +7,8 @@ import android.appwidget.AppWidgetManager;
 import android.preference.PreferenceManager;
 
 public class Preferences {
-    public static final String PORTFOLIO = "Portfolio-%d";
+    public static final String PORTFOLIO = "Portfolio";
+    public static final String PORTFOLIO_OLD = "Portfolio-%d";
     public static final String CURRENT_INDEX = "CurrentIndex-%d";
     // let update interval be common for all the widgets
     public static final String UPDATE_INTERVAL = "UpdateInterval";   
@@ -18,8 +19,11 @@ public class Preferences {
     }
     
     public static List<String> getPortfolio(Context context, int appWidgetId) {
-    	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);    	
-		String commaTickers = prefs.getString(Preferences.get(Preferences.PORTFOLIO, appWidgetId), context.getString(R.string.defaultPortfolio));
+    	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+    	// first get an old portfolio
+    	String commaTickers = prefs.getString(Preferences.get(Preferences.PORTFOLIO_OLD, appWidgetId), context.getString(R.string.defaultPortfolio));
+    	// but if the new portfolio exists then use it
+		commaTickers = prefs.getString(Preferences.PORTFOLIO, commaTickers);
 		return new ArrayList<String>(Arrays.asList(commaTickers.split(",")));
     }
     
@@ -29,21 +33,30 @@ public class Preferences {
     	int[] appWidgetIds = getAllWidgetIds(context);
     	String commaTickers;
     	String[] tickers;
+    	// use old way first
+    	final String defaultPortfolio = context.getString(R.string.defaultPortfolio);
     	for (int appWidgetId : appWidgetIds) {
-    		commaTickers = prefs.getString(Preferences.get(Preferences.PORTFOLIO, appWidgetId), context.getString(R.string.defaultPortfolio));
+    		commaTickers = prefs.getString(Preferences.get(Preferences.PORTFOLIO_OLD, appWidgetId), defaultPortfolio);
     		tickers = commaTickers.split(",");
     		for (String ticker : tickers) {
     			if (!result.contains(ticker))
     			  result.add(ticker);
     		}
     	}
+    	// then use the one generic portfolio
+		commaTickers = prefs.getString(Preferences.PORTFOLIO, defaultPortfolio);
+		tickers = commaTickers.split(",");
+		for (String ticker : tickers) {
+			if (!result.contains(ticker))
+			  result.add(ticker);
+		}
     	return result;
     }
     
     public static void setPortfolio(Context context, int appWidgetId, String tickers) {
     	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
     	Editor edit = prefs.edit();
-    	edit.putString(Preferences.get(Preferences.PORTFOLIO, appWidgetId), tickers);
+    	edit.putString(Preferences.PORTFOLIO, tickers);
     	edit.commit();
     }
     
@@ -75,7 +88,6 @@ public class Preferences {
     	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		Editor edit = prefs.edit();
 		for(int appWidgetId : appWidgetIds) {
-			edit.remove(Preferences.get(Preferences.PORTFOLIO, appWidgetId));
 			edit.remove(Preferences.get(Preferences.CURRENT_INDEX, appWidgetId));
 		}
 		edit.commit();
