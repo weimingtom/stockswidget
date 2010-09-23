@@ -260,9 +260,10 @@ public class StocksProvider extends ContentProvider {
 				final String priceDateStr = jo.getString("LastTradeDate") + " " + jo.getString("LastTradeTime");
 				try {
 					SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy h:mma");
-					dateFormat.setTimeZone(TimeZone.getTimeZone("EDT"));
+					dateFormat.setTimeZone(TimeZone.getTimeZone("EST5EDT"));
 					Date priceDate = dateFormat.parse(priceDateStr);
 					dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+					dateFormat.setTimeZone(TimeZone.getDefault());
 					values.put(QuotesColumns.price_date.toString(), dateFormat.format(priceDate));
 				} catch (ParseException e) {
 					e.printStackTrace();
