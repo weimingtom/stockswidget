@@ -7,7 +7,7 @@ import android.os.*;
 
 public class UpdateService extends Service {
 
-	private static PendingIntent serviceIntent = null;
+	public static PendingIntent serviceIntent = null;
 	
 	@Override
 	public IBinder onBind(Intent intent) {

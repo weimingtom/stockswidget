@@ -157,7 +157,7 @@ public class StocksWidgetScrollable extends StocksWidget{
 		if (intent == null)
 			return;
 
-		final int NB_ITEMS_TO_FILL = 6;
+		final int NB_ITEMS_TO_FILL = 7;
 		final int[] cursorIndices = new int[NB_ITEMS_TO_FILL];
 		final int[] viewTypes = new int[NB_ITEMS_TO_FILL];
 		final int[] layoutIds = new int[NB_ITEMS_TO_FILL];
@@ -186,6 +186,13 @@ public class StocksWidgetScrollable extends StocksWidget{
 		cursorIndices[iItem] = StocksProvider.QuotesColumns.price.ordinal();
 		viewTypes[iItem] = LauncherIntent.Extra.Scroll.Types.TEXTVIEW;
 		layoutIds[iItem] = R.id.quotePrice;
+		clickable[iItem] = true;
+		defResources[iItem] = 0;
+		iItem++;
+
+		cursorIndices[iItem] = StocksProvider.QuotesColumns.price_date.ordinal();
+		viewTypes[iItem] = LauncherIntent.Extra.Scroll.Types.TEXTVIEW;
+		layoutIds[iItem] = R.id.quoteTime;
 		clickable[iItem] = true;
 		defResources[iItem] = 0;
 		iItem++;

@@ -1,5 +1,7 @@
 package com.paulish.widgets.stocks;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import org.json.*;
 import com.paulish.internet.*;
@@ -14,7 +16,7 @@ public class StocksProvider extends ContentProvider {
 	
 	private class DatabaseHelper extends SQLiteOpenHelper {		
 		public static final String DATABASE_NAME = "stocks.db";
-		public static final int DATABASE_VERSION = 1;
+		public static final int DATABASE_VERSION = 2;
 
 		public DatabaseHelper(Context context) {
 			super(context, DATABASE_NAME, null, DATABASE_VERSION);			
@@ -22,13 +24,15 @@ public class StocksProvider extends ContentProvider {
 
 		@Override
 		public void onCreate(SQLiteDatabase db) {
-			db.execSQL( "CREATE TABLE IF NOT EXISTS quotes (symbol TEXT PRIMARY KEY ON CONFLICT REPLACE, name TEXT, price TEXT, change DOUBLE, pchange TEXT);");
+			db.execSQL( "CREATE TABLE IF NOT EXISTS quotes (symbol TEXT PRIMARY KEY ON CONFLICT REPLACE, name TEXT, price TEXT, price_date DATE, change DOUBLE, pchange TEXT);");
 		}
 
 		@Override
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 			db.execSQL("DROP TABLE IF EXISTS quotes");
 			onCreate(db);
+			// now ask for the data update
+			loadFromYahooInBackgroud(null);			
 		}
 	}
 	
@@ -83,13 +87,14 @@ public class StocksProvider extends ContentProvider {
 	public static final String QUOTES_TABLE_NAME = "quotes";
 	
 	public enum QuotesColumns {
-		symbol, name, price, change, pchange, stateimage
+		symbol, name, price, price_date, change, pchange, stateimage
 	}
 
 	public static final String[] PROJECTION_QUOTES = new String[] {
 		QuotesColumns.symbol.toString(),
 		QuotesColumns.name.toString(), 
-		QuotesColumns.price.toString(), 
+		QuotesColumns.price.toString(),
+		"strftime('%d/%m, %H:%M', price_date)",
 		"CASE WHEN change is NULL THEN \"\" WHEN change > 0 THEN \"+\" || change ELSE \"\" || change END as " + QuotesColumns.change.toString(),
 		"CASE WHEN pchange is NULL THEN \"\" ELSE pchange END as " + QuotesColumns.pchange.toString(),
 		"CASE WHEN change IS NULL THEN " + Integer.toString(R.drawable.stocks_widget_state_gray) + 
@@ -249,8 +254,20 @@ public class StocksProvider extends ContentProvider {
 			values.put(QuotesColumns.symbol.toString(), jo.getString("Symbol"));
 			if (!jo.isNull("Name"))
 				values.put(QuotesColumns.name.toString(), jo.getString("Name"));
-			if (!jo.isNull("LastTradePriceOnly"))
+			if (!jo.isNull("LastTradePriceOnly")) {
 				values.put(QuotesColumns.price.toString(), jo.getString("LastTradePriceOnly"));
+				// get the date + time in EDT
+				final String priceDateStr = jo.getString("LastTradeDate") + " " + jo.getString("LastTradeTime");
+				try {
+					SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy h:mma");
+					dateFormat.setTimeZone(TimeZone.getTimeZone("EDT"));
+					Date priceDate = dateFormat.parse(priceDateStr);
+					dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+					values.put(QuotesColumns.price_date.toString(), dateFormat.format(priceDate));
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+			}
 			// percent change is N/A when change is null
 			if (!jo.isNull("Change")) {
 				values.put(QuotesColumns.change.toString(), jo.getDouble("Change"));
@@ -265,7 +282,7 @@ public class StocksProvider extends ContentProvider {
 		final ContentValues values = new ContentValues();
 		
 		final RestClient client = new RestClient("http://query.yahooapis.com/v1/public/yql");
-        client.AddParam("q", "select Symbol, Name, LastTradePriceOnly, Change, PercentChange from yahoo.finance.quotes where symbol in (" + prepareTickers(tickers) + ")");
+        client.AddParam("q", "select Symbol, Name, LastTradePriceOnly, Change, PercentChange, LastTradeDate, LastTradeTime from yahoo.finance.quotes where symbol in (" + prepareTickers(tickers) + ")");
         client.AddParam("format", "json");
         client.AddParam("env", "http://datatables.org/alltables.env");
         client.AddParam("callback", "");

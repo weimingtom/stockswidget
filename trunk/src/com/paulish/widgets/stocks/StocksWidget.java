@@ -23,6 +23,9 @@ public abstract class StocksWidget extends AppWidgetProvider {
 		for (int appWidgetId : appWidgetIds) { 
         	updateWidget(context, appWidgetId, false);
 		}
+		
+		if (UpdateService.serviceIntent == null)
+			UpdateService.registerService(context);
 	}
 		
 	protected abstract void updateWidget(Context context, int appWidgetId, Boolean loading);
