@@ -7,6 +7,7 @@ import android.appwidget.AppWidgetManager;
 import android.content.*;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.*;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
@@ -15,10 +16,8 @@ import android.widget.AdapterView.OnItemClickListener;
 
 public class ConfigurationActivity extends Activity implements OnClickListener, OnItemClickListener {
 	
-/*	private class TickersPreference extends Preference {
-		
-	}
-*/	
+	private final static String TAG = "paulish.ConfigurationActivity";
+
 	private List<String> tickers;
 	private ArrayAdapter<String> adapter;
 	private int appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
@@ -134,46 +133,24 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 			QuoteViewActivity.openForSymbol(this, tickers.get(position));
 	}
 	
-	private void editSymbol(final int position) {
-		
-		// I can't find a way to create a good search dialog to lookup the
-		// yahoo symbols directly here. Seems only yahoo can do this on their website.
-		// Or we can query yahoo.finance.industry, yahoo.finance.sectors, etc tables to select
-		// a symbol from the catalog.
-		
-		AlertDialog.Builder alert = new AlertDialog.Builder(this);
-		// Set an EditText view to get user input		
-		final EditText input = new EditText(this);
-		alert.setView(input);
-
-		if (position == -1)
-			alert.setTitle(R.string.addTickerSymbol);
-		else {
-			alert.setTitle(R.string.editTickerSymbol);
-			input.setText(tickers.get(position));
+	protected void onNewIntent(Intent intent) {
+		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+			String query = intent.getStringExtra(SearchManager.QUERY);
+			int position = intent.getIntExtra("position", -1);
+			if (position == -1)
+				adapter.insert(query, tickers.size() - 1);
+			else 
+				tickers.set(position, query);
+			adapter.notifyDataSetChanged();
 		}
-		alert.setMessage(R.string.tickerSymbol);		  
-
-		alert.setPositiveButton(android.R.string.ok,
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						final String value = input.getText().toString();
-						if (position == -1)
-							adapter.insert(value, tickers.size() - 1);
-						else 
-							tickers.set(position, value);
-						adapter.notifyDataSetChanged();
-					}
-				});
-
-		alert.setNegativeButton(android.R.string.cancel,
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						// Canceled.
-					}
-				});
-
-		alert.show();
+	}
+	
+	private void editSymbol(final int position) {
+		Intent search = new Intent(this, SymbolSearchActivity.class);
+		search.setAction(Intent.ACTION_VIEW);
+		search.putExtra("position", position);
+		if (position != -1)
+			search.putExtra("ticker", tickers.get(position));
 	}
 	
 	private void editUpdateInterval() {

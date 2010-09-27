@@ -16,4 +16,5 @@
     <string name="stocks">Stocks</string>
     <string name="stocksScrollable">Stocks (scrollable)</string>
     <string name="stocksSingle">Stocks (small)</string>
+<string name="tickerSearchHint">Search the ticker</string>
 </resources>

@@ -15,4 +15,5 @@
     <string name="app_name">Виджет Акций</string>
     <string name="stocksScrollable">Акции (прокручиваемый)</string>
     <string name="stocksSingle">Акции (маленький)</string>
+<string name="tickerSearchHint">Искать символ</string>
 </resources>
