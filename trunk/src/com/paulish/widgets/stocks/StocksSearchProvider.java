@@ -44,7 +44,8 @@ public class StocksSearchProvider extends ContentProvider {
     private static final String[] COLUMNS = {
         "_id",
         SearchManager.SUGGEST_COLUMN_TEXT_1,
-        SearchManager.SUGGEST_COLUMN_TEXT_2
+        SearchManager.SUGGEST_COLUMN_TEXT_2,
+        SearchManager.SUGGEST_COLUMN_INTENT_DATA
     };
 
 	@Override
@@ -123,8 +124,9 @@ public class StocksSearchProvider extends ContentProvider {
             	try {
             		JSONArray ja = new JSONObject(response).getJSONObject("ResultSet").getJSONArray("Result");
                     for (int id = 0; id < ja.length(); id++) {
-                    	JSONObject jo = ja.getJSONObject(id);                    	
-                    	cursor.addRow(new Object[] {id, jo.getString("symbol"), jo.getString("name")});
+                    	JSONObject jo = ja.getJSONObject(id);
+                    	String symbol = jo.getString("symbol");
+                    	cursor.addRow(new Object[] {id, symbol, jo.getString("name"), symbol});
                     }
             		
             	} catch (JSONException e) {
