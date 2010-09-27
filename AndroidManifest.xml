@@ -6,6 +6,9 @@
             android:authorities="com.paulish.widgets.stocks.provider"
             android:grantUriPermissions="true"
             android:multiprocess="true" android:name=".StocksProvider"/>
+        <provider
+            android:authorities="com.paulish.widgets.stocks.searchprovider"
+            android:multiprocess="true" android:name=".StocksSearchProvider"/>
         <!-- Broadcast Receiver that will process AppWidget updates -->
         <receiver android:label="@string/stocksScrollable" android:name=".receivers.StocksWidgetScrollable">
             <intent-filter>
@@ -21,7 +24,7 @@
             </intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/stocks_widget_provider_single"/>
         </receiver>
-        <activity android:name=".ConfigurationActivity">
+        <activity android:name=".ConfigurationActivity" android:excludeFromRecents="true">
             <intent-filter>
                 <action android:name="com.paulish.widgets.stocks.PREFS"/>
             </intent-filter>
@@ -31,7 +34,17 @@
                 <action android:name="com.paulish.widgets.stocks.QUOTE_VIEW"/>
             </intent-filter>
         </activity>
-        <activity android:name=".SymbolSearchActivity" android:excludeFromRecents="true"/>
+        <activity android:name=".SymbolSearchActivity" android:excludeFromRecents="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+			<intent-filter>
+            	<action android:name="android.intent.action.SEARCH" />
+                <category android:name="android.intent.category.DEFAULT" />
+        	</intent-filter>
+        	<meta-data android:name="android.app.searchable" android:resource="@xml/searchable"/>        
+        </activity>        
         <service android:name=".UpdateService"/>
     </application>
     <uses-sdk android:minSdkVersion="7"/>
