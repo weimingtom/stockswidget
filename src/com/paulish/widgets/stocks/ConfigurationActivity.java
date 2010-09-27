@@ -7,7 +7,6 @@ import android.appwidget.AppWidgetManager;
 import android.content.*;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.*;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
@@ -16,7 +15,7 @@ import android.widget.AdapterView.OnItemClickListener;
 
 public class ConfigurationActivity extends Activity implements OnClickListener, OnItemClickListener {
 	
-	private final static String TAG = "paulish.ConfigurationActivity";
+	private final static int requestSymbolSearch = 1;
 
 	private List<String> tickers;
 	private ArrayAdapter<String> adapter;
@@ -133,24 +132,29 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 			QuoteViewActivity.openForSymbol(this, tickers.get(position));
 	}
 	
-	protected void onNewIntent(Intent intent) {
-		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-			String query = intent.getStringExtra(SearchManager.QUERY);
-			int position = intent.getIntExtra("position", -1);
-			if (position == -1)
-				adapter.insert(query, tickers.size() - 1);
-			else 
-				tickers.set(position, query);
-			adapter.notifyDataSetChanged();
-		}
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == requestSymbolSearch) {
+			if (resultCode == RESULT_OK) {
+				final int position = data.getIntExtra(SymbolSearchActivity.TAG_POSITION, -1);
+				final String symbol = data.getStringExtra(SymbolSearchActivity.TAG_SYMBOL);
+				if (position == -1)
+					adapter.insert(symbol, tickers.size() - 1);
+				else 
+					tickers.set(position, symbol);
+				adapter.notifyDataSetChanged();
+			}			
+		} else
+			super.onActivityResult(requestCode, resultCode, data);
 	}
 	
 	private void editSymbol(final int position) {
 		Intent search = new Intent(this, SymbolSearchActivity.class);
 		search.setAction(Intent.ACTION_VIEW);
-		search.putExtra("position", position);
+		search.putExtra(SymbolSearchActivity.TAG_POSITION, position);
 		if (position != -1)
-			search.putExtra("ticker", tickers.get(position));
+			search.putExtra(SymbolSearchActivity.TAG_SYMBOL, tickers.get(position));
+		startActivityForResult(search, requestSymbolSearch);
 	}
 	
 	private void editUpdateInterval() {

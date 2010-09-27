@@ -201,14 +201,18 @@ public class StocksProvider extends ContentProvider {
 		final StringBuffer result = new StringBuffer();
 		final int size = tickers.size(); 
 	    if (size > 0) {
-	    	result.append("\"");
-	        result.append(tickers.get(0).toUpperCase());
-	    	result.append("\"");
-	        for (int i = 1; i < size; i++) {
-		    	result.append(",\"");
-	            result.append(tickers.get(i).toUpperCase());
+	        for (String ticker : tickers) {
 		    	result.append("\"");
+		    	ticker = ticker.toUpperCase();
+		    	if (ticker.equals("^DJI")) {
+		            result.append("INDU\",\"");		    		
+		    	}
+	            result.append(ticker);
+		    	result.append("\"");
+		    	result.append(",");
 	        }
+	        // remove the final ","
+	        result.setLength(result.length() - 1);
 	    }
 	    return result.toString();
 	}
