@@ -26,11 +26,12 @@
                 <action android:name="com.paulish.widgets.stocks.PREFS"/>
             </intent-filter>
         </activity>
-        <activity android:name=".QuoteViewActivity">
+        <activity android:name=".QuoteViewActivity" android:excludeFromRecents="true">
             <intent-filter>
                 <action android:name="com.paulish.widgets.stocks.QUOTE_VIEW"/>
             </intent-filter>
         </activity>
+        <activity android:name=".SymbolSearchActivity" android:excludeFromRecents="true"/>
         <service android:name=".UpdateService"/>
     </application>
     <uses-sdk android:minSdkVersion="7"/>
