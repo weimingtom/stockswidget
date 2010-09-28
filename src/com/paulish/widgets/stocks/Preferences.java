@@ -14,9 +14,11 @@ public class Preferences {
     public static final String PORTFOLIO = "Portfolio";
     public static final String PORTFOLIO_OLD = "Portfolio-%d";
     public static final String CURRENT_INDEX = "CurrentIndex-%d";
+    public static final String DATE_DAY_FIRST = "key_date_day_first";
+    public static final String HOUR_24 = "key_24_hour";
     // let update interval be common for all the widgets
     public static final String UPDATE_INTERVAL = "UpdateInterval";   
-    public static final int DEFAULT_UPDATE_INTERVAL = 15; // 15 minutes
+    public static final String DEFAULT_UPDATE_INTERVAL = "15"; // 15 minutes
        
     public static String get(String aPref, int aAppWidgetId) {
     	return String.format(aPref, aAppWidgetId);    	
@@ -65,14 +67,22 @@ public class Preferences {
     }
     
     public static int getUpdateInterval(Context context) {
-    	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);    	
-		return prefs.getInt(Preferences.UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL);
+    	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+    	try {
+    		int interval = prefs.getInt(Preferences.UPDATE_INTERVAL, -1);
+    		if (interval == -1)
+    			return Integer.parseInt(prefs.getString(Preferences.UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL));
+    		else
+    			return interval;
+    	} catch (ClassCastException e) {
+    		return Integer.parseInt(prefs.getString(Preferences.UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL));
+    	}    	        	
     }
     
     public static void setUpdateInterval(Context context, int interval) {
     	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
     	Editor edit = prefs.edit();
-    	edit.putInt(Preferences.UPDATE_INTERVAL, interval);
+    	edit.putString(Preferences.UPDATE_INTERVAL, new Integer(interval).toString());
     	edit.commit();    	
     }
     
@@ -118,4 +128,20 @@ public class Preferences {
     	
     	return res;
     }
+
+	public static String formatFieldDate(Context context, String fieldName) {
+    	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);    	
+		return "strftime('" + (prefs.getBoolean(Preferences.DATE_DAY_FIRST, true)?"%d/%m', ":"%m/%d', ") + fieldName + ")";    	
+	}
+
+	public static String formatFieldTime(Context context, String fieldName) {
+    	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+    	if (prefs.getBoolean(Preferences.HOUR_24, true))
+    		return "strftime('%H:%M', " + fieldName + ")";
+    	else
+    		return "CASE WHEN CAST(strftime('%H', " + fieldName + 
+    		  ") as INTEGER) >= 12 THEN '' || (CAST(strftime('%H', " + fieldName + 
+    		  ") as INTEGER) - 12) || strftime(':%M p.m.', " + fieldName + 
+    		  ") ELSE '' || CAST(strftime('%H', " + fieldName + ") as INTEGER) || strftime(':%M a.m.', " + fieldName + ") END";    	
+	}
 }
