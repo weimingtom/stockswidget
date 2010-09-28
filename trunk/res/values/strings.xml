@@ -23,11 +23,34 @@
     <string name="update_interval_title">Update interval</string>
     <string name="update_interval_summary">How often to poll the Yahoo service for new values.</string>
     <string name="about">About</string>
-<string name="stocks_24_hour_summary">Displays times in 24-hour format instead of AM/PM times.</string>
+    <string name="stocks_24_hour_summary">Displays times in 24-hour format instead of AM/PM times.</string>
     <string name="stocks_24_hour_title">Use 24-hour format</string>
     <string name="key_stocks_24_hour">key_24_hour</string>
     <string name="stocks_date_day_first_title">Use DD/MM date format</string>
     <string name="key_stocks_date_day_first">key_date_day_first</string>
     <string name="stocks_date_day_first_summary">Displays dates in DD/MM format instead of MM/DD format.</string>
-<string name="about_text">About text</string>
+    <string name="about_text">Stocks widget\n\nScrollable widget requires a launcher wich supports scrollable widgets API. For example:\nLauncherPro, ADW, FreeHome, Helix, TagHome.\n
+\nVersion history:\n
+1.4:\n
+*show configuration screen when widget is inserted into the launcher\n
+*add an ability to choose between 24/12 hour format and DD/MM MM/DD date formats\n
+*changed the scrollable widget layout a bit\n\n
+1.3:\n
+*add ticker on the quick suggestion click instead of performing a search again\n
+*refactoring to reduce possible memort leaks\n
+*increased symbol size on the scrollable layout\n
+*fixed a bug with showing refresh message while automatic update\n\n
+1.2:\n
+*implement yahoo symbols search\n
+*does not require a ^DJI trick with INDU anymore\n
+*minor improvements\n\n
+1.1.1:\n
+*fixed timezone conversion\n\n
+1.1:\n
+*load quotes date and time and show them on scrollable widget\n
+*change scrollable widget layout a bit\n
+*try to solve updates with interval problem\n\n
+1.0:\n
+*now all the widgets have one portfolio which is not deleted together with widget. as result you can remove/insert widget without the need to edit portfolio again\n
+*removed scrollbar from the list (LaucherPro widgets have no scrollbars)</string>
 </resources>
