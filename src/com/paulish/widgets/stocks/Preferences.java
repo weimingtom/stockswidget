@@ -141,7 +141,7 @@ public class Preferences {
     	else
     		return "CASE WHEN CAST(strftime('%H', " + fieldName + 
     		  ") as INTEGER) >= 12 THEN '' || (CAST(strftime('%H', " + fieldName + 
-    		  ") as INTEGER) - 12) || strftime(':%M p.m.', " + fieldName + 
-    		  ") ELSE '' || CAST(strftime('%H', " + fieldName + ") as INTEGER) || strftime(':%M a.m.', " + fieldName + ") END";    	
+    		  ") as INTEGER) - 12) || strftime(':%M pm', " + fieldName + 
+    		  ") ELSE '' || CAST(strftime('%H', " + fieldName + ") as INTEGER) || strftime(':%M am', " + fieldName + ") END";    	
 	}
 }
