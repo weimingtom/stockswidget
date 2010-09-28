@@ -61,7 +61,7 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 			Intent resultValue = new Intent();                    
             resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
             setResult(RESULT_OK, resultValue);
-            StocksProvider.loadFromYahooInBackgroud(appWidgetId);
+            StocksProvider.loadFromYahooInBackgroud(this, appWidgetId);
             UpdateService.registerService(this);
             finish();            
 			break;
@@ -150,7 +150,7 @@ public class ConfigurationActivity extends Activity implements OnClickListener, 
 	
 	private void editSymbol(final int position) {
 		Intent search = new Intent(this, SymbolSearchActivity.class);
-		search.setAction(Intent.ACTION_VIEW);
+		search.setAction(Intent.ACTION_EDIT);
 		search.putExtra(SymbolSearchActivity.TAG_POSITION, position);
 		if (position != -1)
 			search.putExtra(SymbolSearchActivity.TAG_SYMBOL, tickers.get(position));
