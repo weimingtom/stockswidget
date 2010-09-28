@@ -10,11 +10,12 @@ import android.database.Cursor;
 import android.database.sqlite.*;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.util.Log;
 
 public class StocksProvider extends ContentProvider {
 	public static final String TAG = "paulish.StocksProvider";
 	
-	private class DatabaseHelper extends SQLiteOpenHelper {		
+	private static class DatabaseHelper extends SQLiteOpenHelper {		
 		public static final String DATABASE_NAME = "stocks.db";
 		public static final int DATABASE_VERSION = 2;
 
@@ -31,41 +32,33 @@ public class StocksProvider extends ContentProvider {
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 			db.execSQL("DROP TABLE IF EXISTS quotes");
 			onCreate(db);
-			// now ask for the data update
-			loadFromYahooInBackgroud(null);			
 		}
 	}
 	
-	private static class YahooUpdateTask extends AsyncTask<Integer, Void, Void> {
+	private static class YahooUpdateTask extends AsyncTask<Object, Void, Void> {
+		private Context ctx = null;
 		private Integer[] appWidgetIds = null;
 		
 		@Override
-		protected Void doInBackground(Integer... appWidgetIds) {
-			
-			// check that all passed widgets <> 0, else update all the widgets
-			boolean isNull = appWidgetIds == null;
-			if (!isNull)
-				for (Integer appWidgetId : appWidgetIds)
-					if (appWidgetId == null) {
-						isNull = true;
-						break;
-					}					
-			
-			if (isNull) {
+		protected Void doInBackground(Object... args) {
+			ctx = (Context)args[0]; 
+			Integer appWidgetId = (Integer)args[1];
+			Log.d(TAG, "doInBackground");
+			if (appWidgetId == null) {
+				Log.d(TAG, "appWidgetId = null");
 				final int[] tmpWidgetIds = Preferences.getAllWidgetIds(ctx);
-				this.appWidgetIds = new Integer[tmpWidgetIds.length];
+				appWidgetIds = new Integer[tmpWidgetIds.length];
 				for (int i = 0; i < tmpWidgetIds.length; i++)
-					this.appWidgetIds[i] = tmpWidgetIds[i];
-            } else
-				this.appWidgetIds = appWidgetIds;
-			StocksWidget.setLoading(ctx, this.appWidgetIds, true);
-			if (isNull)
-				StocksProvider.loadFromYahoo((Integer)null);
-			else
-				for (int appWidgetId : appWidgetIds) {
-					   StocksProvider.loadFromYahoo(appWidgetId);
-					}
-			return null;
+					appWidgetIds[i] = tmpWidgetIds[i];
+			}
+			else {
+				Log.d(TAG, "appWidgetId = " + appWidgetId.toString());
+				appWidgetIds = new Integer[1];
+				appWidgetIds[0] = appWidgetId.intValue();
+			}
+			StocksWidget.setLoading(ctx, appWidgetIds, true);
+		    StocksProvider.loadFromYahoo(ctx);
+		    return null;
 		}
 				
 		protected void onPostExecute(Void result) {
@@ -103,9 +96,8 @@ public class StocksProvider extends ContentProvider {
 		    " ELSE " + Integer.toString(R.drawable.stocks_widget_state_green) + " END as " + QuotesColumns.stateimage.toString()
 	};
 
-	private static Context ctx = null;
-	private static DatabaseHelper dbHelper = null;
-	private static SQLiteDatabase stocksDB = null;
+	private Context ctx = null;
+	private SQLiteDatabase stocksDB = null;
 
 	static {
 		URI_MATCHER.addURI(AUTHORITY, "quotes", URI_QUOTES);
@@ -115,16 +107,18 @@ public class StocksProvider extends ContentProvider {
 
 	@Override
 	public boolean onCreate() {
-		if (ctx == null)
-		   ctx = getContext();
-		 
-		if (dbHelper == null)
-		   dbHelper = new DatabaseHelper(ctx);
-		
-		if (stocksDB == null)
-		   stocksDB = dbHelper.getWritableDatabase();
+		ctx = getContext();
+		DatabaseHelper dbHelper = new DatabaseHelper(ctx);
+		stocksDB = dbHelper.getReadableDatabase();
 		
 	    return (stocksDB == null)? false:true;
+	}
+	
+	@Override
+	protected void finalize() throws Throwable {
+		if (stocksDB != null)
+			stocksDB.close();
+		super.finalize();
 	}
 	
 	@Override
@@ -185,15 +179,15 @@ public class StocksProvider extends ContentProvider {
 		return 0;
 	}
 	
-	public static void notifyDatabaseModification(int widgetId) {		
+	public static void notifyDatabaseModification(Context ctx, int widgetId) {		
 		final Uri widgetUri = CONTENT_URI_WIDGET_QUOTES.buildUpon().appendEncodedPath(Integer.toString(widgetId)).build();
 		ctx.getContentResolver().notifyChange(widgetUri, null);
 	}
 	
-	public static void notifyAllWidgetsModification() {
+	public static void notifyAllWidgetsModification(Context ctx) {
 		final int[] appWidgetIds = Preferences.getAllWidgetIds(ctx);
 		for (int appWidgetId : appWidgetIds) {
-			notifyDatabaseModification(appWidgetId);
+			notifyDatabaseModification(ctx, appWidgetId);
 		}
 	}
 	
@@ -233,22 +227,15 @@ public class StocksProvider extends ContentProvider {
 		return result.toString();
 	}
 	
-	public static void loadFromYahoo(Integer appWidgetId) {
-		if (appWidgetId == null) {
-			final List<String> tickers = Preferences.getAllPortfolios(ctx);
-			loadFromYahoo(tickers);
-		    notifyAllWidgetsModification();
-		}
-		else {
-			final List<String> tickers = Preferences.getPortfolio(ctx, appWidgetId);
-			loadFromYahoo(tickers);
-			notifyDatabaseModification(appWidgetId);
-		}
+	public static void loadFromYahoo(Context ctx) {
+		final List<String> tickers = Preferences.getAllPortfolios(ctx);
+		loadFromYahoo(ctx, tickers);
+	    notifyAllWidgetsModification(ctx);
 	}
 	
-	public static void loadFromYahooInBackgroud(Integer appWidgetId) {
+	public static void loadFromYahooInBackgroud(Context ctx, Integer appWidgetId) {
 		final YahooUpdateTask yahooUpdateTask = new YahooUpdateTask();
-        yahooUpdateTask.execute(appWidgetId); 
+        yahooUpdateTask.execute(ctx, appWidgetId); 
 	}
 	
 	// helper for loadFromYahoo
@@ -282,7 +269,7 @@ public class StocksProvider extends ContentProvider {
 			e.printStackTrace();
 		}
 	}
-	private static void loadFromYahoo(List<String> tickers) {
+	private static void loadFromYahoo(Context ctx, List<String> tickers) {
 		
 		final ContentValues values = new ContentValues();
 		
@@ -304,20 +291,25 @@ public class StocksProvider extends ContentProvider {
         //Log.d(TAG, "... response: " + response);
                
         try {
-			JSONObject jo = new JSONObject(response).getJSONObject("query").getJSONObject("results");
-			// we can get either an array of quotes or just one quote
-			final JSONArray ja = jo.optJSONArray("quote");			
-			if (ja != null) {
-				for (int i = 0; i < ja.length(); i++) {
-					jo = ja.getJSONObject(i);
+			SQLiteDatabase stocksDB = new DatabaseHelper(ctx).getWritableDatabase();
+			try {
+				JSONObject jo = new JSONObject(response).getJSONObject("query").getJSONObject("results");
+				// we can get either an array of quotes or just one quote
+				final JSONArray ja = jo.optJSONArray("quote");			
+				if (ja != null) {
+					for (int i = 0; i < ja.length(); i++) {
+						jo = ja.getJSONObject(i);
+						setValuesFromJSONObject(values, jo);
+						stocksDB.insert(QUOTES_TABLE_NAME, null, values);
+					}
+				} else
+				{
+					jo = jo.optJSONObject("quote");
 					setValuesFromJSONObject(values, jo);
 					stocksDB.insert(QUOTES_TABLE_NAME, null, values);
 				}
-			} else
-			{
-				jo = jo.optJSONObject("quote");
-				setValuesFromJSONObject(values, jo);
-				stocksDB.insert(QUOTES_TABLE_NAME, null, values);
+			} finally {
+				stocksDB.close();
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();

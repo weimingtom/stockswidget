@@ -3,5 +3,5 @@
     android:label="@string/app_name"
     android:hint="@string/tickerSearchHint"
     android:searchSuggestAuthority="com.paulish.widgets.stocks.searchprovider" 
-    android:searchSuggestIntentAction="android.intent.action.SEARCH">
+    android:searchSuggestIntentAction="android.intent.action.PICK">
 </searchable>

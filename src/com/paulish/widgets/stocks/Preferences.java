@@ -1,6 +1,10 @@
 package com.paulish.widgets.stocks;
 
 import java.util.*;
+
+import com.paulish.widgets.stocks.receivers.StocksWidgetScrollable;
+import com.paulish.widgets.stocks.receivers.StocksWidgetSingle;
+
 import android.content.*;
 import android.content.SharedPreferences.Editor;
 import android.appwidget.AppWidgetManager;
@@ -97,7 +101,8 @@ public class Preferences {
     	AppWidgetManager awm = AppWidgetManager.getInstance(context);
     	List<int[]> result = new ArrayList<int[]>();
     	
-    	result.add(awm.getAppWidgetIds(new ComponentName(context, StocksWidget.class)));
+    	result.add(awm.getAppWidgetIds(new ComponentName(context, StocksWidgetScrollable.class)));
+    	result.add(awm.getAppWidgetIds(new ComponentName(context, StocksWidgetSingle.class)));
     	
     	int i = 0;
     	for(int[] arr : result)

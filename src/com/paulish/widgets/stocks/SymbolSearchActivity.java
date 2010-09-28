@@ -32,8 +32,6 @@ public class SymbolSearchActivity extends ListActivity {
         if (Intent.ACTION_SEARCH.equals(action)) {
             // Start query for incoming search request
             String query = intent.getStringExtra(SearchManager.QUERY);
-            if (query == null)
-            	query = intent.getDataString();
             // search the query
             Cursor cur = getContentResolver().query(StocksSearchProvider.CONTENT_URI.buildUpon().appendEncodedPath(SearchManager.SUGGEST_URI_PATH_QUERY).appendEncodedPath(query).build(), null, null, null, null);
             startManagingCursor(cur);
@@ -47,21 +45,26 @@ public class SymbolSearchActivity extends ListActivity {
 
             setListAdapter(adapter);            
 
-        } else if (Intent.ACTION_VIEW.equals(action)) {
+        } else if (Intent.ACTION_EDIT.equals(action)) {
         	position = intent.getIntExtra(TAG_POSITION, -1);
         	final String ticker = intent.getStringExtra(TAG_SYMBOL);
         	startSearch(ticker, false, null, false);
-        } 
+        } else if (Intent.ACTION_PICK.equals(action)) {
+        	returnSymbol(intent.getDataString());
+        }
+    }
+    
+    private void returnSymbol(String symbol) {
+		Intent resultValue = new Intent();                    
+        resultValue.putExtra(TAG_POSITION, position);
+        resultValue.putExtra(TAG_SYMBOL, symbol);
+        setResult(RESULT_OK, resultValue);
+        finish();    	
     }
     
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-    	final String symbol = ((CursorWrapper)getListView().getItemAtPosition(position)).getString(1);
-		Intent resultValue = new Intent();                    
-        resultValue.putExtra(TAG_POSITION, this.position);
-        resultValue.putExtra(TAG_SYMBOL, symbol);
-        setResult(RESULT_OK, resultValue);
-        finish();
+    	returnSymbol(((CursorWrapper)getListView().getItemAtPosition(position)).getString(1));
     }
 
 }

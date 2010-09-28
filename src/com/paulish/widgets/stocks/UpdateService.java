@@ -19,9 +19,9 @@ public class UpdateService extends Service {
 		
 		final int appWidgetId = intent.getExtras().getInt(AppWidgetManager.EXTRA_APPWIDGET_ID);
 		if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID)
-			StocksProvider.loadFromYahooInBackgroud(null);
+			StocksProvider.loadFromYahooInBackgroud(getApplicationContext(), null);
 		else
-			StocksProvider.loadFromYahooInBackgroud(appWidgetId);
+			StocksProvider.loadFromYahooInBackgroud(getApplicationContext(), appWidgetId);
 		
 		stopSelf(startId);
 	    
