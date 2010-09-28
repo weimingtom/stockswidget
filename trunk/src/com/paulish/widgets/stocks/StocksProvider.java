@@ -10,7 +10,6 @@ import android.database.Cursor;
 import android.database.sqlite.*;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.util.Log;
 
 public class StocksProvider extends ContentProvider {
 	public static final String TAG = "paulish.StocksProvider";
@@ -43,16 +42,13 @@ public class StocksProvider extends ContentProvider {
 		protected Void doInBackground(Object... args) {
 			ctx = (Context)args[0]; 
 			Integer appWidgetId = (Integer)args[1];
-			Log.d(TAG, "doInBackground");
 			if (appWidgetId == null) {
-				Log.d(TAG, "appWidgetId = null");
 				final int[] tmpWidgetIds = Preferences.getAllWidgetIds(ctx);
 				appWidgetIds = new Integer[tmpWidgetIds.length];
 				for (int i = 0; i < tmpWidgetIds.length; i++)
 					appWidgetIds[i] = tmpWidgetIds[i];
 			}
 			else {
-				Log.d(TAG, "appWidgetId = " + appWidgetId.toString());
 				appWidgetIds = new Integer[1];
 				appWidgetIds[0] = appWidgetId.intValue();
 			}
@@ -87,7 +83,7 @@ public class StocksProvider extends ContentProvider {
 		QuotesColumns.symbol.toString(),
 		QuotesColumns.name.toString(), 
 		QuotesColumns.price.toString(),
-		"strftime('%d/%m, %H:%M', price_date)",
+		QuotesColumns.price_date.toString(),
 		"CASE WHEN change is NULL THEN \"\" WHEN change > 0 THEN \"+\" || change ELSE \"\" || change END as " + QuotesColumns.change.toString(),
 		"CASE WHEN pchange is NULL THEN \"\" ELSE pchange END as " + QuotesColumns.pchange.toString(),
 		"CASE WHEN change IS NULL THEN " + Integer.toString(R.drawable.stocks_widget_state_gray) + 
@@ -144,7 +140,14 @@ public class StocksProvider extends ContentProvider {
 
         // Set the table we're querying.
         qBuilder.setTables(QUOTES_TABLE_NAME);
-
+        
+        // replace price_date column with the required format
+        final String priceDateStr = QuotesColumns.price_date.toString();
+        for (int i = 0; i < projection.length; i++) {
+        	if (priceDateStr.equals(projection[i]))
+        		projection[i] = Preferences.formatFieldDate(ctx, priceDateStr) + "|| ', ' || " + Preferences.formatFieldTime(ctx, priceDateStr) + " as " + priceDateStr;         		        		
+        }
+        
         // If the query ends in a specific record number, we're
         // being asked for a specific record, so set the
         // WHERE clause in our query.

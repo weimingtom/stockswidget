@@ -1,199 +1,97 @@
 package com.paulish.widgets.stocks;
 
-import java.util.List;
-
-import android.app.*;
+import android.app.AlertDialog;
 import android.appwidget.AppWidgetManager;
-import android.content.*;
-import android.content.res.Resources;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.*;
-import android.view.ContextMenu.ContextMenuInfo;
-import android.view.View.OnClickListener;
-import android.widget.*;
-import android.widget.AdapterView.OnItemClickListener;
+import android.preference.Preference;
+import android.preference.Preference.OnPreferenceClickListener;
+import android.preference.PreferenceActivity;
 
-public class ConfigurationActivity extends Activity implements OnClickListener, OnItemClickListener {
+public class ConfigurationActivity extends PreferenceActivity implements OnPreferenceClickListener {
 	
-	private final static int requestSymbolSearch = 1;
+	private int appWidgetId;
 
-	private List<String> tickers;
-	private ArrayAdapter<String> adapter;
-	private int appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
-	private int updateInterval;
-	
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {	
+	protected void onCreate(Bundle savedInstanceState) {
+		// a hack to convert update interval from integer to string
+		// to use it with ListPrefence
+		Preferences.setUpdateInterval(this, Preferences.getUpdateInterval(this));
 		super.onCreate(savedInstanceState);
-		setTitle(R.string.editPortfolio);
-		setContentView(R.layout.stocks_widget_portfolio_edit);
-		findViewById(R.id.save).setOnClickListener(this);
-		findViewById(R.id.updateInterval).setOnClickListener(this);
-		Button btn = (Button)findViewById(R.id.cancel);
-		btn.setText(android.R.string.cancel);
-		btn.setOnClickListener(this);			
+		// Build GUI from resource
+		addPreferencesFromResource(R.xml.preferences);
 		
-		final ListView tickersList = (ListView)findViewById(R.id.tickersList);
-		registerForContextMenu(tickersList);		
-		tickersList.setOnItemClickListener(this);
-		
-		// prepare the listview
-		final Bundle extras = getIntent().getExtras();
-		if (extras != null) {
-			appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID);
-			tickers = Preferences.getPortfolio(this, appWidgetId);
-			adapter = new ArrayAdapter<String>(this, R.layout.stocks_widget_portfolio_edit_list_item, tickers);
-			adapter.add(getString(R.string.addTickerSymbol));
-			tickersList.setAdapter(adapter);
-			updateInterval = Preferences.getUpdateInterval(this);
-		} else
-			finish();
+		// Get the starting Intent
+		Intent launchIntent = getIntent();
+		Bundle extras = launchIntent.getExtras();
+        if (extras != null) {
+            appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
+
+            // Cancel by default
+            Intent cancelResultValue = new Intent();
+            cancelResultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+            setResult(RESULT_CANCELED, cancelResultValue);
+        } else {
+            finish();
+        }
+        // prepare the GUI components
+		preparePortfolioBtn();
+		prepareSaveBtn();
+		prepareAboutBtn();
 	}
-	
-	@Override
-	public void onClick(View v) {
-		switch (v.getId()) {
-		case R.id.cancel: 
-			finish(); 
-			break;
-		case R.id.save:
-			savePreferences();
-			Intent resultValue = new Intent();                    
-            resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
-            setResult(RESULT_OK, resultValue);
-            StocksProvider.loadFromYahooInBackgroud(this, appWidgetId);
-            UpdateService.registerService(this);
-            finish();            
-			break;
-		case R.id.updateInterval:
-			editUpdateInterval();
-		}						
+
+	private void preparePortfolioBtn() {
+		Preference pref = findPreference("EDIT_PORTFOLIO");
+		pref.setOnPreferenceClickListener(this);
+	}
+
+	private void prepareAboutBtn() {
+		Preference pref = findPreference("ABOUT");
+		pref.setOnPreferenceClickListener(this);
+	}
+
+	private void prepareSaveBtn() {
+		final Context context = this;
+		Preference pref = findPreference("SAVE");
+		// Bind the "onClick" for the save preferences to close the activity
+		// and postback "OK"
+		pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+			public boolean onPreferenceClick(final Preference preference) {
+				Intent resultValue = new Intent();                    
+                resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+                setResult(RESULT_OK, resultValue);
+                StocksProvider.loadFromYahooInBackgroud(context, appWidgetId);
+                UpdateService.registerService(context);
+                finish();
+                return false;
+			}
+		});		
 	}
 
 	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-		if (v.getId() == R.id.tickersList) {
-			AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-			
-			if (info.position != tickers.size() - 1) {			
-				menu.setHeaderTitle(tickers.get(info.position));
-				menu.add(Menu.NONE, 0, 0, R.string.openTickerSymbol);
-				menu.add(Menu.NONE, 1, 1, R.string.editTickerSymbol);
-				menu.add(Menu.NONE, 2, 2, R.string.deleteTickerSymbol);
-				if (info.position > 0)
-					menu.add(Menu.NONE, 3, 3, R.string.moveUp);
-				if (info.position < tickers.size() - 2)
-					menu.add(Menu.NONE, 4, 4, R.string.moveDown);
-			}
+	public boolean onPreferenceClick(Preference preference) {
+		final String key = preference.getKey();
+		if (key.equals("ABOUT")) {
+			AlertDialog alertDialog;
+			alertDialog = new AlertDialog.Builder(this).create();
+			alertDialog.setTitle(getString(R.string.about));
+			alertDialog.setMessage(getString(R.string.about_text));
+			alertDialog.setButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {			
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.cancel();
+				}
+			});
+			alertDialog.show();			
+		} else if (key.equals("EDIT_PORTFOLIO")) {
+			Intent intent = new Intent(this, PortfolioActivity.class);
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+			intent.putExtra(PortfolioActivity.TAG_SKIP_UPDATE, true);
+			startActivity(intent);
 		}
-	}
-	
-	@Override
-	public boolean onContextItemSelected(MenuItem item) {
-		final AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-		final int menuItemIndex = item.getItemId();
-		final int position = info.position;
-		switch (menuItemIndex) {
-		case 0:
-			QuoteViewActivity.openForSymbol(this, tickers.get(position));
-			break;
-		case 1:
-			editSymbol(position);
-			break;
-		case 2:
-			tickers.remove(position);
-			adapter.notifyDataSetChanged();
-			break;
-		case 3:
-			if (position > 0) {
-				final String curValue = tickers.get(position);
-				tickers.set(position, tickers.get(position - 1));
-				tickers.set(position - 1, curValue);
-				adapter.notifyDataSetChanged();
-			}
-			break;
-		case 4:
-			if (position < tickers.size() - 2) {
-				final String curValue = tickers.get(position);
-				tickers.set(position, tickers.get(position + 1));
-				tickers.set(position + 1, curValue);
-				adapter.notifyDataSetChanged();
-			}
-			break;
-		}
-		return true;
+		
+		return false;
 	}
 
-	@Override
-	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		if (position == tickers.size() - 1)
-			editSymbol(-1);
-		else
-			QuoteViewActivity.openForSymbol(this, tickers.get(position));
-	}
-	
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == requestSymbolSearch) {
-			if (resultCode == RESULT_OK) {
-				final int position = data.getIntExtra(SymbolSearchActivity.TAG_POSITION, -1);
-				final String symbol = data.getStringExtra(SymbolSearchActivity.TAG_SYMBOL);
-				if (position == -1)
-					adapter.insert(symbol, tickers.size() - 1);
-				else 
-					tickers.set(position, symbol);
-				adapter.notifyDataSetChanged();
-			}			
-		} else
-			super.onActivityResult(requestCode, resultCode, data);
-	}
-	
-	private void editSymbol(final int position) {
-		Intent search = new Intent(this, SymbolSearchActivity.class);
-		search.setAction(Intent.ACTION_EDIT);
-		search.putExtra(SymbolSearchActivity.TAG_POSITION, position);
-		if (position != -1)
-			search.putExtra(SymbolSearchActivity.TAG_SYMBOL, tickers.get(position));
-		startActivityForResult(search, requestSymbolSearch);
-	}
-	
-	private void editUpdateInterval() {
-		AlertDialog.Builder alert = new AlertDialog.Builder(this);
-		
-		// temporary. an ugly piece of code :) Just for testing.
-		final Resources res = getResources();
-		final String[] updateIntervalEntryValues = res.getStringArray(R.array.stocks_update_interval_entryValues);
-		final String strInterval = Integer.toString(updateInterval);
-		int item = -1;
-		for (int i = 0; i < updateIntervalEntryValues.length; i++)
-			if (updateIntervalEntryValues[i].equals(strInterval)) {
-				item = i;
-				break;
-			};
-
-		
-		alert.setSingleChoiceItems(res.getStringArray(R.array.stocks_update_interval_entries), item,
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int which) {
-						updateInterval = Integer.parseInt(updateIntervalEntryValues[which]);
-						dialog.cancel();
-					}
-				});
-				
-		alert.show();
-	}
-	
-	private void savePreferences() {
-		StringBuffer result = new StringBuffer();
-		final int count = tickers.size();
-		if (count > 1) {
-			result.append(tickers.get(0));
-			for (int i = 1; i < count - 1; i++) {
-				result.append(",");
-				result.append(tickers.get(i));
-			}
-		}
-		Preferences.setPortfolio(this, appWidgetId, result.toString());
-		Preferences.setUpdateInterval(this, updateInterval);
-	}
 }

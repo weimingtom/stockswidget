@@ -11,10 +11,23 @@
     <string name="defaultPortfolio">^FTSE,^IXIC,RTS.RS,GOOG</string>
     <string name="tickerSymbol">Ticker symbol</string>
     <string name="moveDown">Move Down</string>
-    <string name="moveUp">Move Up</string>
-    <string name="updateInterval">Update interval</string>
+    <string name="moveUp">Move Up</string>   
     <string name="stocks">Stocks</string>
     <string name="stocksScrollable">Stocks (scrollable)</string>
     <string name="stocksSingle">Stocks (small)</string>
-<string name="tickerSearchHint">Search the ticker</string>
+    <string name="tickerSearchHint">Search the ticker</string>
+    <string name="portfolio">Portfolio</string>
+    <string name="pref_grp_main">Main</string>
+    <string name="pref_grp_look">Look and Feel</string>
+    <string name="pref_grp_general">General</string>
+    <string name="update_interval_title">Update interval</string>
+    <string name="update_interval_summary">How often to poll the Yahoo service for new values.</string>
+    <string name="about">About</string>
+<string name="stocks_24_hour_summary">Displays times in 24-hour format instead of AM/PM times.</string>
+    <string name="stocks_24_hour_title">Use 24-hour format</string>
+    <string name="key_stocks_24_hour">key_24_hour</string>
+    <string name="stocks_date_day_first_title">Use DD/MM date format</string>
+    <string name="key_stocks_date_day_first">key_date_day_first</string>
+    <string name="stocks_date_day_first_summary">Displays dates in DD/MM format instead of MM/DD format.</string>
+<string name="about_text">About text</string>
 </resources>
