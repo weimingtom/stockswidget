@@ -53,4 +53,5 @@
 1.0:\n
 *now all the widgets have one portfolio which is not deleted together with widget. as result you can remove/insert widget without the need to edit portfolio again\n
 *removed scrollbar from the list (LaucherPro widgets have no scrollbars)</string>
+<string name="symbolNotFound">Symbol \'%s\' is not found. Press to add it anyway.</string>
 </resources>

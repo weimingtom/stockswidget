@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.CursorWrapper;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -17,6 +18,7 @@ public class SymbolSearchActivity extends ListActivity {
 	public final static String TAG_SYMBOL = "symbol";
 
 	private int position = -1;
+	private String query;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -30,21 +32,32 @@ public class SymbolSearchActivity extends ListActivity {
     public void onNewIntent(Intent intent) {
         final String action = intent.getAction();
         if (Intent.ACTION_SEARCH.equals(action)) {
+            ListAdapter adapter = null;
+
             // Start query for incoming search request
-            String query = intent.getStringExtra(SearchManager.QUERY);
+            query = intent.getStringExtra(SearchManager.QUERY);
+            
             // search the query
-            Cursor cur = getContentResolver().query(StocksSearchProvider.CONTENT_URI.buildUpon().appendEncodedPath(SearchManager.SUGGEST_URI_PATH_QUERY).appendEncodedPath(query).build(), null, null, null, null);
-            startManagingCursor(cur);
+            Cursor cur = managedQuery(StocksSearchProvider.CONTENT_URI.buildUpon().appendEncodedPath(SearchManager.SUGGEST_URI_PATH_QUERY).appendEncodedPath(query).build(), null, null, null, null);
+            if (cur.getCount() > 0) {
+                startManagingCursor(cur);
 
-            ListAdapter adapter = new SimpleCursorAdapter(
-                    this, // Context.
-                    android.R.layout.two_line_list_item,
-                    cur,                                              	  
-                    new String[] {SearchManager.SUGGEST_COLUMN_TEXT_1, SearchManager.SUGGEST_COLUMN_TEXT_2},
-                    new int[] {android.R.id.text1, android.R.id.text2});
-
-            setListAdapter(adapter);            
-
+                adapter = new SimpleCursorAdapter(
+                        this, // Context.
+                        android.R.layout.two_line_list_item,
+                        cur,                                              	  
+                        new String[] {SearchManager.SUGGEST_COLUMN_TEXT_1, SearchManager.SUGGEST_COLUMN_TEXT_2},
+                        new int[] {android.R.id.text1, android.R.id.text2});
+            } else {
+            	cur.close();
+            	
+    			adapter = new ArrayAdapter<String>(
+    					this, 
+    					android.R.layout.simple_list_item_1, 
+    					new String[] {String.format(getString(R.string.symbolNotFound), query)});
+            }
+            	
+            setListAdapter(adapter);           
         } else if (Intent.ACTION_EDIT.equals(action)) {
         	position = intent.getIntExtra(TAG_POSITION, -1);
         	final String ticker = intent.getStringExtra(TAG_SYMBOL);
@@ -64,7 +77,11 @@ public class SymbolSearchActivity extends ListActivity {
     
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-    	returnSymbol(((CursorWrapper)getListView().getItemAtPosition(position)).getString(1));
+    	Object item = getListView().getItemAtPosition(position);
+    	if (item instanceof CursorWrapper)
+    		returnSymbol(((CursorWrapper)item).getString(1));
+    	else
+    		returnSymbol(query);
     }
 
 }
