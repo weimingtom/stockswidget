@@ -5,9 +5,7 @@
     <string name="deleteTickerSymbol">Удалить</string>
     <string name="loading">Загрузка...</string>
     <string name="addTickerSymbol">Добавить символ...</string>
-    <string name="moveDown">Переместить вниз</string>
     <string name="editTickerSymbol">Редактировать</string>
-    <string name="moveUp">Переместить вверх</string>
     <string name="editPortfolio">Редактировать портфель</string>
     <string name="openTickerSymbol">Открыть</string>    
     <string name="stocks">Акции</string>

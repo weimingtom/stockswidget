@@ -4,4 +4,4 @@
 	android:minHeight="294dp"
 	android:initialLayout="@layout/stocks_widget_scrollable"
 	android:configure="com.paulish.widgets.stocks.ConfigurationActivity"
-	android:updatePeriodMillis="86400000"/>
+	android:updatePeriodMillis="0"/>

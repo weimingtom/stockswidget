@@ -42,7 +42,7 @@ public class UpdateService extends Service {
 				serviceIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);							
 			}
 
-			alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, 
+			alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 
 					SystemClock.elapsedRealtime() + updateInterval, 
 					updateInterval, serviceIntent);
 		}		
