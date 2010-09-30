@@ -22,10 +22,7 @@ public abstract class StocksWidget extends AppWidgetProvider {
 
 		for (int appWidgetId : appWidgetIds) { 
         	updateWidget(context, appWidgetId, false);
-		}
-		
-		if (UpdateService.serviceIntent == null)
-			UpdateService.registerService(context);
+		}		
 	}
 		
 	protected abstract void updateWidget(Context context, int appWidgetId, Boolean loading);
@@ -48,15 +45,21 @@ public abstract class StocksWidget extends AppWidgetProvider {
 	 */
 	@Override
 	public void onDeleted(Context context, int[] appWidgetIds) {
-		super.onDeleted(context, appWidgetIds);
-		
-		// if we have no more widgets then stop the service
-		if (Preferences.getAllWidgetIds(context).length == 0)
-			UpdateService.removeService(context);
-		
+		super.onDeleted(context, appWidgetIds);			
 		// Drop the settings if the widget is deleted
 		Preferences.DropSettings(context, appWidgetIds);
-	}	
+	}
+	
+	@Override
+	public void onEnabled(Context context) {
+		if (UpdateService.serviceIntent == null)
+			UpdateService.registerService(context);
+	}
+	
+    @Override
+    public void onDisabled(Context context) {
+		UpdateService.removeService(context);
+	}
 					
 	protected boolean appWidgetClassMatch(Context context, int appWidgetId) {
         final AppWidgetManager awm = AppWidgetManager.getInstance(context);

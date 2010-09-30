@@ -10,8 +10,6 @@
     <string name="editTickerSymbol">Edit</string>
     <string name="defaultPortfolio">^FTSE,^IXIC,RTS.RS,GOOG</string>
     <string name="tickerSymbol">Ticker symbol</string>
-    <string name="moveDown">Move Down</string>
-    <string name="moveUp">Move Up</string>   
     <string name="stocks">Stocks</string>
     <string name="stocksScrollable">Stocks (scrollable)</string>
     <string name="stocksSingle">Stocks (small)</string>
@@ -54,4 +52,5 @@
 *now all the widgets have one portfolio which is not deleted together with widget. as result you can remove/insert widget without the need to edit portfolio again\n
 *removed scrollbar from the list (LaucherPro widgets have no scrollbars)</string>
 <string name="symbolNotFound">Symbol \'%s\' is not found. Press to add it anyway.</string>
+<color name="dragndrop_background">#e0103010</color>
 </resources>

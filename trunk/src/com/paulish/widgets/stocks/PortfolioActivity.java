@@ -2,6 +2,8 @@ package com.paulish.widgets.stocks;
 
 import java.util.List;
 
+import com.android.music.TouchInterceptor;
+
 import android.app.*;
 import android.appwidget.AppWidgetManager;
 import android.content.*;
@@ -10,9 +12,8 @@ import android.view.*;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
 import android.widget.*;
-import android.widget.AdapterView.OnItemClickListener;
 
-public class PortfolioActivity extends Activity implements OnClickListener, OnItemClickListener {
+public class PortfolioActivity extends ListActivity implements OnClickListener {
 	
 	public final static String TAG_SKIP_UPDATE = "SkipUpdate";
 	private final static int requestSymbolSearch = 1;
@@ -21,31 +22,37 @@ public class PortfolioActivity extends Activity implements OnClickListener, OnIt
 	private ArrayAdapter<String> adapter;
 	private int appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
 	private boolean skipUpdate = false;
+	private ListView tickersList;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {	
 		super.onCreate(savedInstanceState);
-		setTitle(R.string.editPortfolio);
 		setContentView(R.layout.stocks_widget_portfolio_edit);
 		findViewById(R.id.save).setOnClickListener(this);
 		Button btn = (Button)findViewById(R.id.cancel);
 		btn.setText(android.R.string.cancel);
 		btn.setOnClickListener(this);			
 		
-		final ListView tickersList = (ListView)findViewById(R.id.tickersList);
+		tickersList = getListView();
 		registerForContextMenu(tickersList);		
-		tickersList.setOnItemClickListener(this);
 		
 		// prepare the listview
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID);
 			if (extras.containsKey(TAG_SKIP_UPDATE))
-				skipUpdate = extras.getBoolean(TAG_SKIP_UPDATE);
+				skipUpdate = extras.getBoolean(TAG_SKIP_UPDATE);			
+		
+            ((TouchInterceptor) tickersList).setDropListener(mDropListener);
+            ((TouchInterceptor) tickersList).setRemoveListener(mRemoveListener);
+            ((TouchInterceptor) tickersList).setRemoveMode(TouchInterceptor.FLING);
+            tickersList.setCacheColorHint(0);
+            
 			tickers = Preferences.getPortfolio(this, appWidgetId);
-			adapter = new ArrayAdapter<String>(this, R.layout.stocks_widget_portfolio_edit_list_item, tickers);
-			adapter.add(getString(R.string.addTickerSymbol));
+			adapter = new PortfolioAdapter(this, tickers);
+			adapter.add(getString(R.string.addTickerSymbol));            
 			tickersList.setAdapter(adapter);
+			
 		} else
 			finish();
 	}
@@ -70,7 +77,7 @@ public class PortfolioActivity extends Activity implements OnClickListener, OnIt
 
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-		if (v.getId() == R.id.tickersList) {
+		if (v == tickersList) {
 			AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
 			
 			if (info.position != tickers.size() - 1) {			
@@ -78,10 +85,6 @@ public class PortfolioActivity extends Activity implements OnClickListener, OnIt
 				menu.add(Menu.NONE, 0, 0, R.string.openTickerSymbol);
 				menu.add(Menu.NONE, 1, 1, R.string.editTickerSymbol);
 				menu.add(Menu.NONE, 2, 2, R.string.deleteTickerSymbol);
-				if (info.position > 0)
-					menu.add(Menu.NONE, 3, 3, R.string.moveUp);
-				if (info.position < tickers.size() - 2)
-					menu.add(Menu.NONE, 4, 4, R.string.moveDown);
 			}
 		}
 	}
@@ -102,28 +105,12 @@ public class PortfolioActivity extends Activity implements OnClickListener, OnIt
 			tickers.remove(position);
 			adapter.notifyDataSetChanged();
 			break;
-		case 3:
-			if (position > 0) {
-				final String curValue = tickers.get(position);
-				tickers.set(position, tickers.get(position - 1));
-				tickers.set(position - 1, curValue);
-				adapter.notifyDataSetChanged();
-			}
-			break;
-		case 4:
-			if (position < tickers.size() - 2) {
-				final String curValue = tickers.get(position);
-				tickers.set(position, tickers.get(position + 1));
-				tickers.set(position + 1, curValue);
-				adapter.notifyDataSetChanged();
-			}
-			break;
 		}
 		return true;
 	}
 
 	@Override
-	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+	public void onListItemClick(ListView l, View view, int position, long id) {
 		if (position == tickers.size() - 1)
 			editSymbol(-1);
 		else
@@ -146,6 +133,58 @@ public class PortfolioActivity extends Activity implements OnClickListener, OnIt
 			super.onActivityResult(requestCode, resultCode, data);
 	}
 	
+	static class PortfolioAdapter extends ArrayAdapter<String> {
+		
+		PortfolioAdapter(Context context, List<String> portfolio) {
+			super(context, R.layout.stocks_widget_portfolio_edit_list_item, android.R.id.text1, portfolio);
+		}
+		
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+	        View v = super.getView(position, convertView, parent);	        
+	        ImageView iv = (ImageView) v.findViewById(R.id.icon);
+	        if (position < getCount() - 1) {
+	            iv.setVisibility(View.VISIBLE);
+	            iv.setImageResource(R.drawable.ic_mp_move);
+	        } else
+	        	iv.setVisibility(View.GONE);
+	        
+			return v;
+		}
+
+	}	
+    
+    private TouchInterceptor.DropListener mDropListener =
+        new TouchInterceptor.DropListener() {
+        public void drop(int from, int to) {
+        	final int last = adapter.getCount() - 1;
+        	if (from >= last)
+        		from = last - 1;
+        	if (to >= last)
+        		to = last - 1;
+			final String curValue = tickers.get(from);
+			tickers.set(from, tickers.get(to));
+			tickers.set(to, curValue);
+            adapter.notifyDataSetChanged();
+            getListView().invalidateViews();
+        }
+    };
+    
+    private TouchInterceptor.RemoveListener mRemoveListener =
+        new TouchInterceptor.RemoveListener() {
+        public void remove(int which) {
+        	if (which < adapter.getCount() - 1) {
+                View v = tickersList.getChildAt(which - tickersList.getFirstVisiblePosition());
+                v.setVisibility(View.GONE);
+                tickersList.invalidateViews();
+    			tickers.remove(which);
+    			adapter.notifyDataSetChanged();            
+                v.setVisibility(View.VISIBLE);
+                tickersList.invalidateViews();
+        	}
+        }
+    };
+    
 	private void editSymbol(final int position) {
 		Intent search = new Intent(this, SymbolSearchActivity.class);
 		search.setAction(Intent.ACTION_EDIT);
