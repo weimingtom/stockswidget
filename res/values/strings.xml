@@ -29,6 +29,11 @@
     <string name="stocks_date_day_first_summary">Displays dates in DD/MM format instead of MM/DD format.</string>
     <string name="about_text">Stocks widget\n\nScrollable widget requires a launcher wich supports scrollable widgets API. For example:\nLauncherPro, ADW, FreeHome, Helix, TagHome.\n
 \nVersion history:\n
+1.5:\n
+*drag and drop in the portfolio editor\n
+*fixed updates problems\n\n
+1.4.1:\n
+*allow to add symbol which can not be found by yahoo\n\n
 1.4:\n
 *show configuration screen when widget is inserted into the launcher\n
 *add an ability to choose between 24/12 hour format and DD/MM MM/DD date formats\n
