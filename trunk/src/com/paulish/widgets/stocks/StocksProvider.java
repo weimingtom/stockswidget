@@ -283,7 +283,7 @@ public class StocksProvider extends ContentProvider {
         client.AddParam("callback", "");
          
         try {
-            client.Execute(RequestMethod.POST);
+            client.Execute(RequestMethod.GET);
         } catch (Exception e) {
             e.printStackTrace();
         }
