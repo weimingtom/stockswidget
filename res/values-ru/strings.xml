@@ -25,6 +25,8 @@
     <string name="stocks_date_day_first_summary">Отображать даты в DD/MM, а не в MM/DD формате</string>
     <string name="stocks_24_hour_title">Использовать 24-х часовой формат</string>    
     <string name="about_text">Виджет акций\n\Прокручиваемый виджет работает только в лаунчере с поддержкой scrollable API. Напрмиер:\nLauncherPro, ADW, FreeHome, Helix, TagHome.\n
+\nБлагодарности:\n
+Иконка создана vanessaem\n
 \nИстория версий:\n
 1.5:\n
 *drag and drop в редакторе портфеля\n

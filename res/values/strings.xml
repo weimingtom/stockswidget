@@ -28,6 +28,8 @@
     <string name="key_stocks_date_day_first">key_date_day_first</string>
     <string name="stocks_date_day_first_summary">Displays dates in DD/MM format instead of MM/DD format.</string>
     <string name="about_text">Stocks widget\n\nScrollable widget requires a launcher wich supports scrollable widgets API. For example:\nLauncherPro, ADW, FreeHome, Helix, TagHome.\n
+\nCredits:\n
+Icon created by vanessaem\n
 \nVersion history:\n
 1.5:\n
 *drag and drop in the portfolio editor\n
